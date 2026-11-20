@@ -223,7 +223,7 @@ end $$;
 -- Issuance (idempotent, race-safe)
 -- =====================================================================
 create or replace function public.certificate_random_number()
-returns text language plpgsql volatile set search_path = public
+returns text language plpgsql volatile set search_path = public, extensions
 as $$
 declare
   alphabet constant text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';  -- 32 symbols: no 0/O/1/I
@@ -238,7 +238,7 @@ end $$;
 
 -- 24 random bytes → 32 URL-safe characters (192 bits).
 create or replace function public.certificate_random_token()
-returns text language sql volatile set search_path = public
+returns text language sql volatile set search_path = public, extensions
 as $$ select translate(encode(gen_random_bytes(24), 'base64'), '+/', '-_') $$;
 
 -- Ask the Edge Function to render the PDF. Best effort: pg_net sends the
