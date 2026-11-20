@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --ink: #101820;
+    --paper: #f5f4ef;
+    --lime: #b7f36b;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    @apply bg-paper font-sans text-ink antialiased;
+    overflow-x: hidden;
+  }
+  h1, h2, h3, h4 { @apply font-heading tracking-tight; }
+  /* Bengali needs a little more line-height and its own face */
+  :lang(bn), .lang-bn { font-family: "Hind Siliguri", "Inter", sans-serif; line-height: 1.75; }
+  :lang(bn) h1, :lang(bn) h2, :lang(bn) h3 { font-family: "Manrope", "Hind Siliguri", sans-serif; line-height: 1.35; }
+  ::selection { background: rgba(183, 243, 107, 0.45); }
+  *:focus-visible { @apply outline-none ring-2 ring-lime ring-offset-2 ring-offset-transparent; }
+}
+
+@layer components {
+  .eyebrow { @apply font-sans text-[11px] font-semibold uppercase tracking-[0.08em] text-slate; }
+  .surface { @apply rounded-md border border-line bg-white; }
+  .surface-dark { @apply rounded-md border border-ink-600 bg-ink-800; }
+  .mono-meta { @apply font-mono text-xs text-slate; }
+  .page { @apply mx-auto w-full max-w-6xl px-4 pb-28 pt-6 sm:px-6 md:pb-12 lg:px-8; }
+  .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #2b3944 transparent; }
+}
+
+/* Markdown content */
+.prose-cc { @apply max-w-none text-[15px] leading-7 text-ink; }
+.prose-cc h3 { @apply mb-2 mt-6 text-base font-bold; }
+.prose-cc p { @apply my-3; }
+.prose-cc ul { @apply my-3 list-disc pl-5; }
+.prose-cc ol { @apply my-3 list-decimal pl-5; }
+.prose-cc li { @apply my-1; }
+.prose-cc code { @apply rounded-sm bg-paper px-1 py-0.5 font-mono text-[0.85em] text-ink; }
+.prose-cc pre { @apply my-4 overflow-x-auto rounded-md bg-ink p-4 text-[13px] leading-6 text-paper; }
+.prose-cc pre code { @apply bg-transparent p-0 text-paper; }
+.prose-cc table { @apply my-4 w-full border-collapse text-sm; }
+.prose-cc th { @apply border-b border-line py-2 pr-3 text-left font-semibold; }
+.prose-cc td { @apply border-b border-line py-2 pr-3 align-top; }
+.prose-cc strong { @apply font-semibold; }
+.prose-cc a { @apply underline decoration-lime decoration-2 underline-offset-2; }
+.prose-dark { @apply text-paper; }
+.prose-dark code { @apply bg-ink-700 text-paper; }
+.prose-dark th, .prose-dark td { @apply border-ink-600; }
+
+/* CodeMirror container */
+.cm-host .cm-editor { height: 100%; }
+.cm-host .cm-scroller { font-family: "JetBrains Mono", ui-monospace, monospace; }

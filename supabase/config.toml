@@ -1,0 +1,20 @@
+# Minimal Supabase CLI config. Run `supabase link --project-ref <ref>` before deploying.
+project_id = "campuscode"
+
+[api]
+max_rows = 1000
+
+[auth]
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173/reset-password", "http://localhost:5173/auth/callback"]
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+
+[functions.execute]
+verify_jwt = false   # guests may run code; the function itself validates the JWT when present
+
+[functions.submit]
+verify_jwt = true
