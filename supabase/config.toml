@@ -18,3 +18,6 @@ verify_jwt = false   # guests may run code; the function itself validates the JW
 
 [functions.submit]
 verify_jwt = true
+
+[functions.certificates]
+verify_jwt = false   # `render` is called by the database; `sync`/`download` validate the JWT themselves

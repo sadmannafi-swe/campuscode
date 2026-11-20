@@ -12,7 +12,7 @@
     "admin:grant": "node scripts/grant-admin.mjs",
     "test:db": "bash supabase/tests/run.sh",
     "test:functions": "deno test --allow-all supabase/functions/_shared/judge0_test.ts",
-    "check:functions": "deno check supabase/functions/execute/index.ts supabase/functions/submit/index.ts"
+    "check:functions": "deno check supabase/functions/execute/index.ts supabase/functions/submit/index.ts supabase/functions/certificates/index.ts"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.18.3",

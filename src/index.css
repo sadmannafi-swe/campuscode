@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Certificate preview: the same OFL face the PDF uses for the student's name and course. */
+@font-face {
+  font-family: "CC Certificate Display";
+  src: url("/certificate/fonts/Jersey10.ttf") format("truetype");
+  font-display: swap;
+}
+
 @layer base {
   :root {
     --ink: #101820;

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { DifficultyBadge, ErrorState, ProgressBar, Skeleton, Switch } from "@/components/ui/misc";
 import { Avatar } from "@/components/common/Avatar";
 import { DeveloperCredit } from "@/components/brand/DeveloperCredit";
+import { MyCertificates } from "@/components/certificates/MyCertificates";
 import {
   getActivity, getStats, listAchievements, listMyAchievements, listSolved, updateProfile, type ProfilePatch,
 } from "@/services/profile";
@@ -165,6 +166,9 @@ export default function ProfilePage() {
           })}
         </div>
       </section>
+
+      {/* Certificates of Completion */}
+      <MyCertificates userId={uid} />
 
       <div className="mt-12 grid gap-8 lg:grid-cols-2">
         {/* Learning progress */}

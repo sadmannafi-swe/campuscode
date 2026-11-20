@@ -31,6 +31,7 @@ const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
 const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
 const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"));
 const AdminApp = lazy(() => import("@/pages/admin/AdminApp"));
+const VerifyCertificatePage = lazy(() => import("@/pages/VerifyCertificatePage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -71,6 +72,7 @@ export function App() {
                   <Route path="practice/:topicSlug" element={<S><PracticeTopicPage /></S>} />
                   <Route path="snippets" element={<RequireAuth><S><SnippetsPage /></S></RequireAuth>} />
                   <Route path="profile" element={<RequireAuth><S><ProfilePage /></S></RequireAuth>} />
+                  <Route path="verify-certificate/:verificationToken" element={<S><VerifyCertificatePage /></S>} />
                   <Route path="profile/settings" element={<RequireAuth><S><SettingsPage /></S></RequireAuth>} />
                   <Route path="*" element={<S><NotFoundPage /></S>} />
                 </Route>

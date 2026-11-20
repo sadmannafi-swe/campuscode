@@ -12,6 +12,7 @@ import { cn, pick } from "@/lib/utils";
 import NotFoundPage from "../NotFoundPage";
 import { LessonVideo } from "@/components/learn/LessonVideo";
 import { LessonRow, lessonRange, pad, useCourseVideos, useLessonStates } from "@/components/learn/courseParts";
+import { CourseCertificateCard } from "@/components/certificates/CourseCertificateCard";
 
 function Header({ outline, done }: { outline: CourseOutline; done: number }) {
   const { t } = useI18n();
@@ -127,7 +128,10 @@ export default function CoursePage() {
   if (!q.data) return <NotFoundPage />;
   return (
     <div className="min-h-full bg-ink">
-      <div className="page">{q.data.course.language === "c" ? <CRoadmap outline={q.data} /> : <PythonCourse outline={q.data} />}</div>
+      <div className="page">
+        {q.data.course.language === "c" ? <CRoadmap outline={q.data} /> : <PythonCourse outline={q.data} />}
+        <CourseCertificateCard courseId={q.data.course.id} />
+      </div>
     </div>
   );
 }

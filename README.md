@@ -158,7 +158,10 @@ npx supabase functions deploy execute --no-verify-jwt
 ```bash
 npx supabase functions deploy submit
 ```
-`execute` skips gateway JWT verification so guests can run code; it validates the JWT itself when one is present.
+```bash
+npx supabase functions deploy certificates --no-verify-jwt
+```
+`execute` skips gateway JWT verification so guests can run code; it validates the JWT itself when one is present. `certificates` does the same: its `render` action is called by the database, and `sync` / `download` validate the student's JWT themselves.
 
 ## Deploying the frontend (Vercel)
 
@@ -183,6 +186,28 @@ npx supabase functions deploy submit
 - Manual quality selection is not offered by CampusCode because YouTube's `setPlaybackQuality` API has had no effect since 2019; students use the player's ⚙ menu. YouTube's mandatory branding (logo, title, "Watch on YouTube") is left untouched as required by YouTube's terms; those links open youtube.com in a new tab.
 - `video_progress` stores resume position and watched time per student. The database caps watched time at 2× real time between saves and marks a video watched at 90% — clients can't set completion, and watching never completes the lesson itself.
 
+## Certificates of Completion
+
+Every student can earn one **Certificate of Completion per course**. It is issued automatically (no admin approval) the moment all mandatory requirements are met, and it shows up in **Profile → My certificates** with a notification.
+
+**Requirements** (checked only in the database, from trusted rows — `certificate_eligibility()`):
+1. every published lesson of the course is completed (`lesson_progress`; watching a video never completes a lesson),
+2. every **required practice** problem is solved (written only by the judge),
+3. the **final assessment** score is ≥ the pass mark (70 %, can be raised, never lowered): the weighted share of hidden tests passed by the student's best judged submission on each assessment problem,
+4. the course has certificates enabled and is fully configured, the account is active and has a full name.
+
+If a course has no practice or no assessment configured, **nothing is issued** — the admin screen lists exactly what is missing. Both seeded courses start unconfigured on purpose: an admin chooses the practice and final-assessment problems in *Admin → Certificates → Course requirements*, enables the course, and (once) presses *Issue to students who already qualify*.
+
+**Issuance** — `issue_certificate_if_eligible()` runs from triggers on lesson completion and on every judged submission. It is idempotent and race-safe (advisory lock + `unique (user_id, course_id)`), draws a unique `CC-YYYY-XXXXXXXX` number and a 192-bit URL-safe verification token, snapshots the printed name/course, logs `certificate_events`, sends exactly one notification and asks the `certificates` Edge Function (via `pg_net`, after commit) to render the PDF. A render lease prevents duplicate rendering; if rendering fails it is logged and retried on the student's next profile visit or download.
+
+**PDF** — A4 landscape, built on the Canva design itself: `public/certificate/template.pdf` is rendered from the supplied PPTX by `scripts/certificate/build_template.py` (LibreOffice + the design's embedded fonts, used only to render that document and never copied into the repo). The Edge Function overlays the name, course, issue date, certificate ID, verification URL, issuer line and a vector QR code at positions measured from the design (`supabase/functions/certificates/layout.ts`). Long names/titles shrink and wrap to two balanced lines inside the free space; Bangla names are shaped with Noto Sans Bengali. The design's Brick Sans is a commercial Canva font, so dynamic text uses the closest open alternative, Jersey 10 (see `public/certificate/fonts/LICENSES.md`). No signature is ever drawn.
+
+**Storage & privacy** — PDFs live in the private `certificates` bucket (no storage policies for anon/authenticated). Downloads are 5-minute signed URLs issued after an owner/admin check; revoked certificates can't be downloaded by students. `/verify-certificate/:token` is public and calls `verify_certificate()`, which returns only status, printed name, course, certificate ID, issue date and "CampusCode" — never e-mail, user IDs or account data. Verification pages are `noindex`.
+
+**Admin** (*Admin → Certificates*) — search by student/username/course/ID, filter by course, status and date, view details with the issuance record, download, copy the verification link, and revoke with a mandatory reason (the student is notified; the public page shows *Revoked*). Revocation is final.
+
+**Configuration** — nothing to set by hand. Optional: `CERT_SITE_URL` Edge Function secret if the site moves off `https://campuscode-cpy.vercel.app` (used for the QR/verification URL and to load the template). The database's callback URL is the `certificates.functions_url` row in `platform_settings`.
+
 ## Content
 
 - `supabase/content/*.mjs` is the source for courses, lessons (English + Bangla), problems, topics and achievements.
@@ -196,7 +221,8 @@ npx supabase functions deploy submit
 - [ ] Auth Site URL + redirect URLs set; email confirmation on; SMTP configured (Supabase's default mailer is heavily rate-limited)
 - [ ] Judge0 secrets set; a test Run and Submit succeed
 - [ ] `IP_HASH_SALT` and `ALLOWED_ORIGINS` set
-- [ ] Both Edge Functions deployed (`execute` with `--no-verify-jwt`)
+- [ ] All three Edge Functions deployed (`execute` and `certificates` with `--no-verify-jwt`)
+- [ ] Certificate requirements configured per course (*Admin → Certificates*) before announcing certificates
 - [ ] First admin granted via SQL editor or `admin:grant`
 - [ ] Vercel env vars set; deep links (e.g. `/learn/c-programming`) load
 - [ ] Supabase *Advisors* (security & performance) reviewed

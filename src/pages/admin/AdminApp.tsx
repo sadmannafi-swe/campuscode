@@ -16,12 +16,14 @@ const AdminUsers = lazy(() => import("./AdminUsers"));
 const AdminReports = lazy(() => import("./AdminReports"));
 const AdminAnnouncements = lazy(() => import("./AdminAnnouncements"));
 const AdminSettings = lazy(() => import("./AdminSettings"));
+const AdminCertificates = lazy(() => import("./AdminCertificates"));
 
 const NAV = [
   { to: "/admin", key: "admin.dashboard", end: true },
   { to: "/admin/problems", key: "admin.problems" },
   { to: "/admin/lessons", key: "admin.lessons" },
   { to: "/admin/roadmap", key: "admin.roadmap" },
+  { to: "/admin/certificates", key: "admin.certificates" },
   { to: "/admin/users", key: "admin.users" },
   { to: "/admin/reports", key: "admin.reports" },
   { to: "/admin/announcements", key: "admin.announcements" },
@@ -59,6 +61,7 @@ export default function AdminApp() {
             <Route path="lessons/new" element={<AdminLessonEdit />} />
             <Route path="lessons/:id" element={<AdminLessonEdit />} />
             <Route path="roadmap" element={<AdminRoadmap />} />
+            <Route path="certificates" element={<AdminCertificates />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="reports" element={<AdminReports />} />
             <Route path="announcements" element={<AdminAnnouncements />} />

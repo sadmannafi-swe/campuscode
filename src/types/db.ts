@@ -365,3 +365,59 @@ export interface VideoProgress {
   completed_at: string | null;
   updated_at: string;
 }
+
+// ---------- Certificates of Completion --------------------------------
+export type CertificateStatus = "valid" | "revoked";
+export type RequirementKind = "practice" | "assessment";
+
+/** A student's own certificate, as returned by the `certificates` Edge Function (sync). */
+export interface MyCertificate {
+  id: string;
+  certificate_number: string;
+  verification_token: string;
+  student_name: string;
+  course_title: string;
+  status: CertificateStatus;
+  issued_at: string;
+  has_pdf: boolean;
+}
+
+/** Public verification result — contains only non-private fields. */
+export interface CertificateVerification {
+  status: CertificateStatus | "not_found";
+  student_name: string | null;
+  course_title: string | null;
+  certificate_number: string | null;
+  issued_at: string | null;
+  issuing_platform: string;
+}
+
+/** Server-computed requirement checklist for the signed-in student (get_my_certificate_progress). */
+export interface CertificateProgress {
+  course_id: string;
+  configured: boolean;
+  missing_config: string[];
+  eligible: boolean;
+  account_active: boolean;
+  name_present: boolean;
+  lessons: { done: number; total: number };
+  practice: { done: number; total: number };
+  assessment: { score: number | null; passing_score: number; attempted: number; total: number; passed: boolean };
+  certificate: { id: string; certificate_number: string; status: CertificateStatus; issued_at: string } | null;
+}
+
+export interface CourseCertificateSettings {
+  course_id: string;
+  enabled: boolean;
+  passing_score: number;
+  issuer_designation: string | null;
+}
+
+export interface CourseRequirement {
+  course_id: string;
+  problem_id: string;
+  kind: RequirementKind;
+  weight: number;
+  sort_order: number;
+  problems: { id: string; slug: string; title: string; difficulty: Difficulty; status: ProblemStatus } | null;
+}
