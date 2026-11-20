@@ -13,12 +13,53 @@ import { getCourseOutline, getLesson, getMyLessonProgress, markLessonCompleted, 
 import { listTopics } from "@/services/problems";
 import { friendlyError } from "@/lib/errors";
 import { cn, pick, pickArr } from "@/lib/utils";
-import type { LessonExample, LessonSummary, UiLang } from "@/types/db";
+import type { LessonExample, LessonProgress, LessonSummary, UiLang } from "@/types/db";
 import { IDE_HANDOFF_KEY } from "@/pages/IdePage";
 import { LessonVideo } from "@/components/learn/LessonVideo";
 import { getVideoProgress, listCourseVideos } from "@/services/videos";
 import { formatClock } from "@/lib/youtube";
 import NotFoundPage from "../NotFoundPage";
+
+/** Completion + previous/next — sits directly under the lesson video (or the lesson header when there is none). */
+function LessonActions({ courseSlug, lessonSlug, prev, next, completed, signedIn, onComplete, completing }: {
+  courseSlug: string; lessonSlug: string; prev: LessonSummary | null; next: LessonSummary | null;
+  completed: boolean; signedIn: boolean; onComplete: () => void; completing: boolean;
+}) {
+  const { t, lang, n } = useI18n();
+  const navBtn = "h-12 min-w-0 w-full justify-start gap-3 px-4 sm:w-auto sm:max-w-[260px]";
+  const label = (dir: "prev" | "next", l: LessonSummary | null) => (
+    <span className={cn("flex min-w-0 flex-col leading-tight", dir === "next" ? "items-end text-right" : "items-start text-left")}>
+      <span className="text-[11px] font-semibold uppercase tracking-wide opacity-70">{dir === "prev" ? t("learn.prevLesson") : t("learn.nextLesson")}</span>
+      {l && <span className="max-w-full truncate text-sm">{n(l.number)} · {pick(l, "title", lang)}</span>}
+    </span>
+  );
+  return (
+    <nav aria-label={t("learn.lessonActions")} data-testid="lesson-actions"
+      className="mt-4 flex flex-col gap-3 rounded border border-line bg-white p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+      <div className="sm:min-w-0 sm:flex-1">
+        {!signedIn ? (
+          <p className="text-sm text-slate"><Link to={`/login?next=${encodeURIComponent(`/learn/${courseSlug}/${lessonSlug}`)}`} className="font-semibold text-ink underline decoration-lime decoration-2 underline-offset-4">{t("nav.signIn")}</Link> — {t("learn.signInToTrack")}</p>
+        ) : completed ? (
+          <p role="status" className="inline-flex h-12 items-center gap-2 font-semibold text-success"><CheckCircle2 className="size-5" />{t("learn.completed")}</p>
+        ) : (
+          <Button variant="lime" size="lg" className="w-full sm:w-auto" onClick={onComplete} loading={completing}><CheckCircle2 /> {t("learn.markComplete")}</Button>
+        )}
+      </div>
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0">
+        {prev ? (
+          <Button asChild variant="outline" className={navBtn}><Link to={`/learn/${courseSlug}/${prev.slug}`} rel="prev"><ArrowLeft />{label("prev", prev)}</Link></Button>
+        ) : (
+          <Button variant="outline" className={navBtn} disabled aria-disabled="true"><ArrowLeft />{label("prev", null)}</Button>
+        )}
+        {next ? (
+          <Button asChild variant="ink" className={cn(navBtn, "justify-end")}><Link to={`/learn/${courseSlug}/${next.slug}`} rel="next">{label("next", next)}<ArrowRight /></Link></Button>
+        ) : (
+          <Button variant="ink" className={cn(navBtn, "justify-end")} disabled aria-disabled="true">{label("next", null)}<ArrowRight /></Button>
+        )}
+      </div>
+    </nav>
+  );
+}
 
 function ExampleCard({ ex, contentLang }: { ex: LessonExample; contentLang: UiLang }) {
   const { t } = useI18n();
@@ -92,7 +133,7 @@ function ChapterLessons({ lessons, currentId, courseSlug, videoSeconds, complete
 
 export default function LessonPage() {
   const { courseSlug, lessonSlug } = useParams();
-  const { t, lang, n } = useI18n();
+  const { t, lang } = useI18n();
   const { user } = useAuth();
   const qc = useQueryClient();
   const [searchParams] = useSearchParams();
@@ -123,15 +164,33 @@ export default function LessonPage() {
     if (user && lesson) markLessonStarted(user.id, lesson.id).then(() => qc.invalidateQueries({ queryKey: ["progress"] })).catch(() => {});
   }, [user, lesson, qc]);
 
+  const progressKey = ["progress", "lessons", user?.id];
   const complete = useMutation({
     mutationFn: () => markLessonCompleted(user!.id, lesson!.id),
-    onSuccess: () => {
-      toast.success(t("learn.completed"));
-      qc.invalidateQueries({ queryKey: ["progress"] });
+    // Show it as completed immediately (checkmarks, progress bars, chapter list); roll back on failure.
+    onMutate: async () => {
+      await qc.cancelQueries({ queryKey: progressKey });
+      const previous = qc.getQueryData<LessonProgress[]>(progressKey);
+      const now = new Date().toISOString();
+      qc.setQueryData<LessonProgress[]>(progressKey, (rows = []) => {
+        const row = rows.find((r) => r.lesson_id === lesson!.id);
+        const done: LessonProgress = { ...(row ?? { user_id: user!.id, lesson_id: lesson!.id, started_at: now }), state: "completed", completed_at: now, updated_at: now } as LessonProgress;
+        return row ? rows.map((r) => (r.lesson_id === lesson!.id ? done : r)) : [...rows, done];
+      });
+      return { previous };
+    },
+    onSuccess: () => toast.success(t("learn.completed")),
+    onError: (e, _v, ctx) => {
+      if (ctx?.previous) qc.setQueryData(progressKey, ctx.previous);
+      toast.error(friendlyError(e, t));
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ["progress"] });          // lesson states + course progress
       qc.invalidateQueries({ queryKey: ["stats"] });
       qc.invalidateQueries({ queryKey: ["notifications"] });
+      qc.invalidateQueries({ queryKey: ["certificate-progress"] });
+      qc.invalidateQueries({ queryKey: ["certificates"] });
     },
-    onError: (e) => toast.error(friendlyError(e, t)),
   });
 
   const videoSeconds = useMemo(
@@ -163,6 +222,10 @@ export default function LessonPage() {
     </section>
   );
   const doneCount = (progress.data ?? []).filter((p) => p.state === "completed" && outline.data!.lessons.some((l) => l.id === p.lesson_id)).length;
+  const actions = (
+    <LessonActions courseSlug={courseSlug!} lessonSlug={lessonSlug!} prev={prev} next={next} completed={Boolean(completed)}
+      signedIn={Boolean(user)} onComplete={() => complete.mutate()} completing={complete.isPending} />
+  );
 
   return (
     <div className="page">
@@ -188,14 +251,19 @@ export default function LessonPage() {
       <p className={cn("mt-2 max-w-3xl text-[15px] text-slate", bnClass)} lang={contentLang}>{pick(lesson, "summary", contentLang)}</p>
       {user && <ProgressBar className="mt-5 max-w-sm" value={doneCount} max={total} />}
 
+      {!lessonVideo && !videos.isLoading && <div className="max-w-3xl">{actions}</div>}
+
       {lessonVideo && !videoProgress.isLoading && (
         <div className="mt-8 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
           <div className="lg:hidden">{objectivesCard}</div>
-          <LessonVideo key={lessonVideo.id} video={lessonVideo} progress={videoProgress.data}
-            poster={{ eyebrow: t("learn.lessonVideoEyebrow", { n: lesson.number }), title: pick(lesson, "title", lang) }}
-            autoplay={searchParams.get("autoplay") === "1"}
-            next={next ? { href: `/learn/${courseSlug}/${next.slug}`, title: pick(next, "title", lang), hasVideo: videoSeconds.has(next.id) } : null}
-            onProgressSaved={() => qc.invalidateQueries({ queryKey: ["video-progress", user?.id] })} />
+          <div className="min-w-0">
+            <LessonVideo key={lessonVideo.id} video={lessonVideo} progress={videoProgress.data}
+              poster={{ eyebrow: t("learn.lessonVideoEyebrow", { n: lesson.number }), title: pick(lesson, "title", lang) }}
+              autoplay={searchParams.get("autoplay") === "1"}
+              next={next ? { href: `/learn/${courseSlug}/${next.slug}`, title: pick(next, "title", lang), hasVideo: videoSeconds.has(next.id) } : null}
+              onProgressSaved={() => qc.invalidateQueries({ queryKey: ["video-progress", user?.id] })} />
+            {actions}
+          </div>
           <aside className="space-y-5">
             <div className="hidden lg:block">{objectivesCard}</div>
             {chapter && (
@@ -241,21 +309,6 @@ export default function LessonPage() {
         </div>
       </div>
 
-      {/* Completion + navigation */}
-      <div className="mt-10 flex flex-col gap-4 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          {user ? (
-            completed ? <p className="inline-flex items-center gap-2 font-semibold text-success"><CheckCircle2 className="size-5" />{t("learn.completed")}</p>
-              : <Button variant="lime" size="lg" onClick={() => complete.mutate()} loading={complete.isPending}><CheckCircle2 /> {t("learn.markComplete")}</Button>
-          ) : (
-            <p className="text-sm text-slate"><Link to={`/login?next=${encodeURIComponent(`/learn/${courseSlug}/${lessonSlug}`)}`} className="font-semibold text-ink underline decoration-lime decoration-2 underline-offset-4">{t("nav.signIn")}</Link> — {t("learn.signInToTrack")}</p>
-          )}
-        </div>
-        <div className="flex gap-2">
-          {prev && <Button asChild variant="outline"><Link to={`/learn/${courseSlug}/${prev.slug}`}><ArrowLeft /> {t("common.previous")} · {n(prev.number)}</Link></Button>}
-          {next && <Button asChild variant="ink"><Link to={`/learn/${courseSlug}/${next.slug}`}>{t("common.next")} · {n(next.number)} <ArrowRight /></Link></Button>}
-        </div>
-      </div>
     </div>
   );
 }
