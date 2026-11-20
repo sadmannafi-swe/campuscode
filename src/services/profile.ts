@@ -29,7 +29,14 @@ export async function uploadAvatar(userId: string, file: File): Promise<string> 
   return data.publicUrl;
 }
 
+/**
+ * Changes the signed-in user's password with Supabase Auth (PUT /auth/v1/user). Requires a live session:
+ * supabase-js refreshes an expired access token first; if there is no session at all we stop here instead
+ * of sending the request. Resolves only after Supabase confirms the change. The password is never logged.
+ */
 export async function changePassword(password: string) {
+  const { data } = await supabase.auth.getSession();
+  if (!data.session) throw new AppError("session_missing", "", 401);
   const { error } = await supabase.auth.updateUser({ password });
   if (error) throw error;
 }

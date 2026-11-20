@@ -9,7 +9,7 @@ import { Field, Input, Textarea } from "@/components/ui/input";
 import { PageLoader, SectionTitle } from "@/components/ui/misc";
 import { Avatar } from "@/components/common/Avatar";
 import { changePassword, updateProfile, uploadAvatar } from "@/services/profile";
-import { friendlyError } from "@/lib/errors";
+import { authErrorCode, friendlyError } from "@/lib/errors";
 import { PasswordInput, isStrongPassword } from "./auth/PasswordInput";
 
 export default function SettingsPage() {
@@ -70,6 +70,7 @@ export default function SettingsPage() {
 
   const savePassword = async (e: FormEvent) => {
     e.preventDefault();
+    if (pwSaving) return;                     // one request at a time
     const errs: Record<string, string> = {};
     if (!isStrongPassword(pw.password)) errs.password = t("auth.passwordRule");
     if (pw.password !== pw.confirm) errs.confirm = t("auth.passwordMismatch");
@@ -77,11 +78,15 @@ export default function SettingsPage() {
     if (Object.keys(errs).length) return;
     setPwSaving(true);
     try {
-      await changePassword(pw.password);
+      await changePassword(pw.password);      // resolves only when Supabase confirms the change
       setPw({ password: "", confirm: "" });
       toast.success(t("profile.passwordChanged"));
     } catch (err) {
-      toast.error(friendlyError(err, t));
+      const message = friendlyError(err, t);
+      const code = authErrorCode(err);
+      // Problems with the chosen password belong next to the field; everything else is a toast.
+      if (code === "same_password" || code === "weak_password") setPwErrors({ password: message });
+      toast.error(message);
     } finally {
       setPwSaving(false);
     }
@@ -126,7 +131,7 @@ export default function SettingsPage() {
         <Field label={t("auth.confirmPassword")} htmlFor="npc" error={pwErrors.confirm}>
           <PasswordInput id="npc" autoComplete="new-password" value={pw.confirm} invalid={Boolean(pwErrors.confirm)} onChange={(e) => setPw({ ...pw, confirm: e.target.value })} />
         </Field>
-        <div className="flex justify-end"><Button type="submit" variant="ink" loading={pwSaving}>{t("auth.updatePassword")}</Button></div>
+        <div className="flex justify-end"><Button type="submit" variant="ink" loading={pwSaving} disabled={pwSaving}>{t("auth.updatePassword")}</Button></div>
       </form>
     </div>
   );

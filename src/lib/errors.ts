@@ -13,15 +13,17 @@ type T = (key: MessageKey, vars?: Record<string, string | number>) => string;
 /** Maps Supabase / network / edge-function errors to friendly, translated text. Never leaks internals. */
 export function friendlyError(err: unknown, t: T): string {
   if (!isSupabaseConfigured) return t("error.notConfigured");
+  if (err instanceof AppError && err.code === "session_missing") return t("error.auth");
   if (err instanceof AppError) return err.message;
   const e = err as { message?: string; code?: string; status?: number } | null;
   const msg = (e?.message ?? "").toLowerCase();
   const code = e?.code ?? "";
   // Supabase Auth error codes (https://supabase.com/docs/guides/auth/debugging/error-codes)
   if (code === "same_password" || msg.includes("should be different from the old password")) return t("auth.samePassword");
-  if (code === "weak_password" || msg.includes("password should")) return t("auth.weakPassword");
+  if (code === "weak_password") return t("auth.weakPassword");
   if (code === "reauthentication_needed" || code === "reauthentication_not_valid") return t("auth.reauthNeeded");
-  if (code === "session_not_found" || code === "session_expired" || code === "refresh_token_not_found") return t("error.auth");
+  if (code === "session_not_found" || code === "session_expired" || code === "refresh_token_not_found" || code === "bad_jwt"
+      || (e as { name?: string } | null)?.name === "AuthSessionMissingError" || msg.includes("auth session missing")) return t("error.auth");
   if (code === "over_request_rate_limit" || code === "over_email_send_rate_limit") return t("auth.tooMany");
   if (msg.includes("failed to fetch") || msg.includes("network") || msg.includes("load failed")) return t("error.network");
   if (msg.includes("invalid login credentials")) return t("auth.invalidCredentials");
@@ -34,4 +36,11 @@ export function friendlyError(err: unknown, t: T): string {
   }
   if (code === "23505" && msg.includes("username")) return t("profile.usernameTaken");
   return t("error.generic");
+}
+
+/** Supabase Auth error code of a failed password change, used to point at the right form field. */
+export function authErrorCode(err: unknown): string {
+  const e = err as { code?: string; message?: string } | null;
+  if (e?.code) return e.code;
+  return (e?.message ?? "").includes("should be different from the old password") ? "same_password" : "";
 }
