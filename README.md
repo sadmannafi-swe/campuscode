@@ -89,8 +89,8 @@ The live deployment's public values are committed in `.env.production` (Supabase
 
 | Secret | Required | Notes |
 |---|---|---|
-| `JUDGE0_URL` | yes | e.g. `https://judge0-ce.p.rapidapi.com` or `https://judge0.your-domain.com` |
-| `JUDGE0_API_KEY` | yes* | RapidAPI key or your self-hosted `AUTHN_TOKEN` (*optional only for an unauthenticated private instance) |
+| `JUDGE0_URL` | no | defaults to Judge0's free public instance `https://ce.judge0.com`; set e.g. `https://judge0-ce.p.rapidapi.com` or `https://judge0.your-domain.com` for production scale, or `off` to disable execution |
+| `JUDGE0_API_KEY` | with your own instance | RapidAPI key or your self-hosted `AUTHN_TOKEN` (*optional only for an unauthenticated private instance) |
 | `JUDGE0_RAPIDAPI_HOST` | no | auto-derived when the URL is on rapidapi.com |
 | `JUDGE0_AUTH_HEADER` | no | defaults to `X-RapidAPI-Key` (RapidAPI) or `X-Auth-Token` (self-hosted) |
 | `JUDGE0_LANGUAGE_ID_C` / `_PYTHON` | no | default `50` (GCC 9.2.0) / `71` (Python 3.8.1) — check `GET /languages` on your instance |
@@ -137,6 +137,8 @@ Admin rights can never be self-assigned from the app: clients cannot write `user
 
 Code never runs in the browser or on the app server. The `execute` and `submit` Edge Functions send it to Judge0's sandbox.
 
+**Default — public instance (works out of the box):** with no `JUDGE0_URL` secret, the functions use Judge0's free public instance `https://ce.judge0.com` (no key). This is what the live site uses today. It is shared with everyone and may be rate-limited or slow at peak times, so it suits a pilot or small classes. For heavier use, switch to option A or B; only the secrets change.
+
 **Option A — RapidAPI (fastest to start):** subscribe to *Judge0 CE* on RapidAPI, then:
 ```bash
 npx supabase secrets set JUDGE0_URL=https://judge0-ce.p.rapidapi.com JUDGE0_API_KEY=<rapidapi-key> IP_HASH_SALT=<random>
@@ -145,7 +147,7 @@ Free/basic RapidAPI plans have a **small daily request quota**; each *Submit* us
 
 **Option B — self-host Judge0 (recommended for real classes):** run Judge0 1.13.x with Docker on a VM (see the Judge0 repository's deployment guide; it requires cgroup support), set `AUTHN_TOKEN` in `judge0.conf`, put it behind HTTPS, and set `JUDGE0_URL` + `JUDGE0_API_KEY=<AUTHN_TOKEN>`. Costs are just the VM.
 
-If Judge0 is not configured, Run/Submit return a clear *"Code execution is not configured"* message — results are never simulated.
+If `JUDGE0_URL=off`, Run/Submit return a clear *"Code execution is not configured"* message — results are never simulated.
 
 **Built-in limits:** 64 KB source and stdin, 3 s CPU / 128 MB for runs, per-problem limits for judging (500–5000 ms, 16–256 MB), networking disabled, 1 MB file writes, and rate limits — signed-in 15 runs/min & 400/day, guests 5/min & 40/day, submissions 6/min & 150/day. An admin can pause all execution from *Admin → Settings*.
 

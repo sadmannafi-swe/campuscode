@@ -1,8 +1,13 @@
 // Judge0 client. Works with a self-hosted Judge0 (X-Auth-Token) or Judge0 CE on RapidAPI.
 // All configuration comes from Edge Function secrets — never from the browser.
+// With no JUDGE0_URL secret, it falls back to Judge0's free public instance (ce.judge0.com),
+// which needs no key but is shared and rate-limited. Set JUDGE0_URL (+ key) for real scale.
+// Set JUDGE0_URL to "off" to disable execution entirely.
 import { HttpError, type Lang } from "./http.ts";
 
-const URL_ = (Deno.env.get("JUDGE0_URL") ?? "").replace(/\/+$/, "");
+export const PUBLIC_JUDGE0_URL = "https://ce.judge0.com";
+const RAW_URL = (Deno.env.get("JUDGE0_URL") ?? "").trim();
+const URL_ = (RAW_URL === "" ? PUBLIC_JUDGE0_URL : RAW_URL.toLowerCase() === "off" ? "" : RAW_URL).replace(/\/+$/, "");
 const KEY = Deno.env.get("JUDGE0_API_KEY") ?? "";
 const RAPID_HOST = Deno.env.get("JUDGE0_RAPIDAPI_HOST") ?? (URL_.includes("rapidapi.com") ? new URL(URL_).host : "");
 const AUTH_HEADER = Deno.env.get("JUDGE0_AUTH_HEADER") ?? (RAPID_HOST ? "X-RapidAPI-Key" : "X-Auth-Token");
