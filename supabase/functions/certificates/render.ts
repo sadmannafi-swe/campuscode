@@ -39,7 +39,13 @@ export function formatIssueDate(d: string | Date): string {
 
 /** Collapses whitespace and strips control characters so nothing can break the layout. */
 export function cleanText(s: string): string {
-  return s.normalize("NFC").replace(/[\u0000-\u001f\u007f-\u009f\u200b\u2028\u2029]/g, " ").replace(/\s+/g, " ").trim();
+  let out = "";
+  for (const ch of s.normalize("NFC")) {
+    const c = ch.codePointAt(0)!;
+    const control = c < 0x20 || (c >= 0x7f && c <= 0x9f) || c === 0x200b || c === 0x2028 || c === 0x2029;
+    out += control ? " " : ch;
+  }
+  return out.replace(/\s+/g, " ").trim();
 }
 
 export async function renderCertificatePdf(deps: RenderDeps, assets: CertificateAssets, data: CertificateData): Promise<Uint8Array> {

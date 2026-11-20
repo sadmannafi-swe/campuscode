@@ -312,3 +312,25 @@ delete from auth.users where email like 'cert-%@test.dev';
 delete from public.problems where slug like 'cert-%';
 delete from public.courses where slug like 'cert-test-%';
 select 'certificate tests passed' as result;
+
+-- render lease: exactly one concurrent claimant wins; it expires after 90 s
+insert into auth.users (id, email, raw_user_meta_data) values ('00000000-0000-0000-0000-0000000000c9', 'lease@test.dev', '{"full_name":"Lease"}');
+insert into public.courses (id, slug, language, title_en, title_bn) values ('00000000-0000-0000-0000-00000000c0c1', 'lease-course', 'c', 'Lease', 'L');
+insert into public.certificates (id, user_id, course_id, certificate_number, verification_token, student_name, course_title, final_score)
+values ('00000000-0000-0000-0000-00000000cc01', '00000000-0000-0000-0000-0000000000c9', '00000000-0000-0000-0000-00000000c0c1',
+        'CC-2026-LEASE234', repeat('L', 32), 'Lease', 'Lease', 90);
+do $$ begin
+  assert public.claim_certificate_render('00000000-0000-0000-0000-00000000cc01'), 'first claim wins';
+  assert not public.claim_certificate_render('00000000-0000-0000-0000-00000000cc01'), 'second claim loses';
+  perform public.release_certificate_render('00000000-0000-0000-0000-00000000cc01');
+  assert public.claim_certificate_render('00000000-0000-0000-0000-00000000cc01'), 'claim after release';
+  update public.certificates set pdf_render_started_at = now() - interval '2 minutes' where id = '00000000-0000-0000-0000-00000000cc01';
+  assert public.claim_certificate_render('00000000-0000-0000-0000-00000000cc01'), 'stale lease reclaimed';
+  update public.certificates set pdf_path = 'x.pdf' where id = '00000000-0000-0000-0000-00000000cc01';
+  update public.certificates set pdf_render_started_at = null where id = '00000000-0000-0000-0000-00000000cc01';
+  assert not public.claim_certificate_render('00000000-0000-0000-0000-00000000cc01'), 'nothing to render once stored';
+end $$;
+delete from public.certificates where id = '00000000-0000-0000-0000-00000000cc01';
+delete from public.courses where slug = 'lease-course';
+delete from auth.users where email = 'lease@test.dev';
+select 'certificate render lease tests passed' as result;
