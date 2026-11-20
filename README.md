@@ -83,6 +83,8 @@ Without the two `VITE_` variables the app still renders, shows a "not connected"
 
 Never put secrets in `VITE_*` variables.
 
+The live deployment's public values are committed in `.env.production` (Supabase project `dcutfxcdpomnmzgezntf`, region ap-south-1). Vercel environment variables, if set, take precedence.
+
 **Edge Function secrets** (`supabase secrets set NAME=value`):
 
 | Secret | Required | Notes |
