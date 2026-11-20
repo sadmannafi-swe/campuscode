@@ -70,7 +70,6 @@ Without the two `VITE_` variables the app still renders, shows a "not connected"
 | `npm run seed:build` | Regenerate `supabase/seed.sql` (needs `gcc` + `python3`; compiles & runs every example and reference solution) |
 | `npm run test:db` | Spin up a throwaway local Postgres, apply all migrations + seed, run the RLS/security tests |
 | `npm run check:functions` / `test:functions` | Deno type-check of Edge Functions / Judge0 client integration test against a local fake Judge0 |
-| `npm run admin:grant -- you@example.com` | Grant the admin role (needs `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` in your shell) |
 
 ## Environment variables
 
@@ -123,15 +122,15 @@ The live deployment's public values are committed in `.env.production` (Supabase
    **Google sign-in:** in Google Cloud Console create an OAuth client (type *Web application*) with authorised redirect URI `https://<ref>.supabase.co/auth/v1/callback`, then paste its Client ID and Secret into *Auth → Sign In / Providers → Google* and enable it. Until then the "Continue with Google" button explains that Google sign-in isn't enabled yet.
 5. **Storage:** the migration creates `avatars` (public read, users write only inside their own `<uid>/` folder, 2 MB, images only) and `course-assets` (public read, admin write).
 
-### Creating the first administrator
+### Administrator (one-time bootstrap at `/ccadmingo`)
 
-Admin rights can never be self-assigned from the app: clients cannot write `user_roles`, and every admin RPC re-checks `is_admin()` server-side.
+CampusCode has **exactly one administrator**, fixed by a one-time setup:
 
-1. Sign up normally through the app with the account that should become admin.
-2. Grant the role from a trusted context — **either**:
-   - Supabase dashboard → SQL editor: `select public.bootstrap_admin('you@example.com');`
-   - or from your machine: `SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… npm run admin:grant -- you@example.com`
-3. Sign in again; **Admin** appears in the profile menu and `/admin` opens. Further admins can be granted from *Admin → Users*.
+1. Open `https://<your-site>/ccadmingo` and choose **Continue with Google**.
+2. The first account that completes setup with a **verified Google (Gmail) identity** claims the single admin slot (`claim_initial_admin()`, an atomic insert into the one-row `admin_identity` table). Email/password accounts cannot claim it.
+3. From then on `/ccadmingo` shows only an administrator sign-in; any other account — including valid student accounts — is shown *Access denied*. `/admin/*` redirects guests to `/ccadmingo`.
+
+Admin status is computed only by `is_admin()` (= "is this the claimed identity"), never from e-mails or client flags. Roles cannot be granted from the dashboard, scripts or `bootstrap_admin` any more. To hand the role to someone else, the project owner runs in the SQL editor `delete from public.user_roles where role = 'admin'; delete from public.admin_identity;` and the next verified Google account claims it at `/ccadmingo`.
 
 ## Judge0 setup
 
@@ -186,9 +185,19 @@ npx supabase functions deploy certificates --no-verify-jwt
 - Manual quality selection is not offered by CampusCode because YouTube's `setPlaybackQuality` API has had no effect since 2019; students use the player's ⚙ menu. YouTube's mandatory branding (logo, title, "Watch on YouTube") is left untouched as required by YouTube's terms; those links open youtube.com in a new tab.
 - `video_progress` stores resume position and watched time per student. The database caps watched time at 2× real time between saves and marks a video watched at 90% — clients can't set completion, and watching never completes the lesson itself.
 
+## Module quizzes & course completion
+
+The C course has one quiz per module (9 × 8 questions: 6 multiple choice + 2 programming problems). Content lives in `supabase/content/c-quizzes.mjs`; `npm run seed:build` **compiles and runs every "what does this print?" question with gcc** and fails if the marked answer is not the real output, and verifies each programming problem's C and Python references on every test.
+
+- **Unlocking:** a module's quiz opens when all its lessons are completed; the next module unlocks only when the previous quiz is passed. Lessons of locked modules can be read but not marked completed (enforced by a database trigger).
+- **Attempts:** started, saved and graded only by RPCs (`start_quiz_attempt`, `save_quiz_answer`, `submit_quiz_attempt`). Questions and option order are reshuffled per attempt; answer keys are in `quiz_answer_keys`, unreadable by students. A programming question is correct only if the judge recorded an **accepted** submission *during that attempt* (Solve in IDE → existing problem workspace; hidden tests stay server-side). If code execution is unavailable, the question simply counts as incorrect — nothing passes by default.
+- **Rules:** 6/8 (75 %) passes; 3+ incorrect fails; unlimited retakes (whole quiz); failed attempts never reset lesson progress; a passed quiz stays passed. Correct answers and explanations are shown only after submission.
+- **Course completion** (`course_completions`): all published lessons + all module quizzes + any configured required practice / final assessment, computed from trusted rows. It is recorded automatically on the event that satisfies the last requirement (lesson completion, judged submission, quiz pass) and then triggers certificate issuance. A course without any server-verified requirement (quizzes or a judged assessment) is never marked complete.
+- **Reconciliation:** `pg_cron` runs `reconcile_certificates()` every 5 minutes: it retries pending certificate PDFs and re-checks recent activity for completions whose triggering event failed.
+
 ## Certificates of Completion
 
-Every student can earn one **Certificate of Completion per course**. It is issued automatically (no admin approval) the moment all mandatory requirements are met, and it shows up in **Profile → My certificates** with a notification.
+Every student can earn one **Certificate of Completion per course**. It is issued automatically (no admin approval) when the course is completed. A certificate counts as **issued only once its PDF is stored**: until then it shows as *Preparing* in **Profile → My certificates**, does not verify publicly and sends no notification; the notification is sent exactly once when the PDF lands.
 
 **Requirements** (checked only in the database, from trusted rows — `certificate_eligibility()`):
 1. every published lesson of the course is completed (`lesson_progress`; watching a video never completes a lesson),
@@ -204,7 +213,9 @@ If a course has no practice or no assessment configured, **nothing is issued** �
 
 **Storage & privacy** — PDFs live in the private `certificates` bucket (no storage policies for anon/authenticated). Downloads are 5-minute signed URLs issued after an owner/admin check; revoked certificates can't be downloaded by students. `/verify-certificate/:token` is public and calls `verify_certificate()`, which returns only status, printed name, course, certificate ID, issue date and "CampusCode" — never e-mail, user IDs or account data. Verification pages are `noindex`.
 
-**Admin** (*Admin → Certificates*) — search by student/username/course/ID, filter by course, status and date, view details with the issuance record, download, copy the verification link, and revoke with a mandatory reason (the student is notified; the public page shows *Revoked*). Revocation is final.
+**Signature line** — the issuer name *Nafi* is typeset in Great Vibes (OFL) above “Authorized Issuer” (text, not an image).
+
+**Admin** (*Admin → Certificates*, *Admin → Quizzes*) — search by student/username/course/ID, filter by course, status and date, view details with the issuance record, download, copy the verification link, and revoke with a mandatory reason (the student is notified; the public page shows *Revoked*). Revocation is final.
 
 **Configuration** — nothing to set by hand. Optional: `CERT_SITE_URL` Edge Function secret if the site moves off `https://campuscode-cpy.vercel.app` (used for the QR/verification URL and to load the template). The database's callback URL is the `certificates.functions_url` row in `platform_settings`.
 
@@ -223,7 +234,7 @@ If a course has no practice or no assessment configured, **nothing is issued** �
 - [ ] `IP_HASH_SALT` and `ALLOWED_ORIGINS` set
 - [ ] All three Edge Functions deployed (`execute` and `certificates` with `--no-verify-jwt`)
 - [ ] Certificate requirements configured per course (*Admin → Certificates*) before announcing certificates
-- [ ] First admin granted via SQL editor or `admin:grant`
+- [ ] Administrator claimed at `/ccadmingo` with the owner's Google account
 - [ ] Vercel env vars set; deep links (e.g. `/learn/c-programming`) load
 - [ ] Supabase *Advisors* (security & performance) reviewed
 - [ ] Judge0 quota / VM size matched to expected class size

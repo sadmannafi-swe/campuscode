@@ -1,23 +1,8 @@
 #!/usr/bin/env node
-// Grants the admin role to an existing account. Run from YOUR machine only — it needs the
-// service-role key, which must never be shipped to the browser or committed.
-//
-//   SUPABASE_URL=https://xyz.supabase.co SUPABASE_SERVICE_ROLE_KEY=... npm run admin:grant -- you@example.com
-//
-// Equivalent SQL (Supabase dashboard → SQL editor):  select public.bootstrap_admin('you@example.com');
-import { createClient } from "@supabase/supabase-js";
-
-const [email] = process.argv.slice(2);
-const url = process.env.SUPABASE_URL;
-const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-if (!email || !url || !key) {
-  console.error("Usage: SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… npm run admin:grant -- <email>");
-  process.exit(1);
-}
-const supabase = createClient(url, key, { auth: { persistSession: false } });
-const { data, error } = await supabase.rpc("bootstrap_admin", { p_email: email });
-if (error) {
-  console.error("Failed:", error.message);
-  process.exit(1);
-}
-console.log(data);
+// Retired. CampusCode has exactly one administrator, claimed once through the setup flow at /ccadmingo
+// by a verified Google account (public.claim_initial_admin). Roles can no longer be granted by script,
+// SQL helper or dashboard. To transfer the administrator after the slot is claimed (owner action, SQL editor):
+//   delete from public.user_roles where role = 'admin';
+//   delete from public.admin_identity;          -- reopens /ccadmingo setup for the next verified Google account
+console.error("Retired: the administrator is claimed once at /ccadmingo (see README → Administrator).");
+process.exit(1);
