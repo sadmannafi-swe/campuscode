@@ -19,6 +19,7 @@ export interface CertificateAssets {
   display: Uint8Array;    // Jersey 10 (OFL) — stands in for the design's Brick Sans on dynamic text
   serif: Uint8Array;      // Lora Regular (OFL) — the design's body face
   fallback: Uint8Array;   // Noto Sans Bengali Bold (OFL) — Bangla and any glyph the others lack
+  script: Uint8Array;     // Great Vibes (OFL) — the issuer's name on the signature line (typeset, not an image)
 }
 
 // deno-lint-ignore no-explicit-any
@@ -64,6 +65,7 @@ export async function renderCertificatePdf(deps: RenderDeps, assets: Certificate
   const display = await pdf.embedFont(assets.display, { subset: true });
   const serif = await pdf.embedFont(assets.serif, { subset: true });
   const fallback = await pdf.embedFont(assets.fallback, { subset: true });
+  const script = await pdf.embedFont(assets.script, { subset: true });
   const cmapOf = (bytes: Uint8Array) => deps.fontkit.create(bytes).characterSet as number[];
   const covers = (set: Set<number>, s: string) => [...s].every((ch) => ch === " " || set.has(ch.codePointAt(0)!));
   const displaySet = new Set(cmapOf(assets.display));
@@ -157,6 +159,11 @@ export async function renderCertificatePdf(deps: RenderDeps, assets: Certificate
   serifLine(data.certificateNumber, { x: LAYOUT.valueX, ...LAYOUT.certificateId });
   serifLine(data.verificationUrl.replace(/^https?:\/\//, ""), { ...LAYOUT.verification });
   serifLine(data.issuer?.trim() || "CampusCode Learning Platform", { ...LAYOUT.issuer });
+
+  // Issuer name on the signature line: typeset text in a script face (no image, no imitation of handwriting).
+  const sig = LAYOUT.signature;
+  const sigWidth = script.widthOfTextAtSize(sig.text, sig.size);
+  page.drawText(sig.text, { x: pt(sig.cx) - sigWidth / 2, y: y(sig.baseline), size: sig.size, font: script, color: ink });
 
   // QR code (vector): white quiet zone, then dark modules merged into horizontal runs.
   const qr = deps.qrcode(0, "M");

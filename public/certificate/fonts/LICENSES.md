@@ -8,6 +8,7 @@ SIL Open Font License 1.1 (https://openfontlicense.org), which permits bundling 
 |---|---|---|
 | `Jersey10.ttf` | Jersey 10 (latin + latin-ext) | © 2023 The Soft Type Project Authors (github.com/scfried/soft-type-jersey) |
 | `Lora-Regular.ttf` | Lora (latin + latin-ext) | © 2011 The Lora Project Authors, Reserved Font Name "Lora" |
+| `GreatVibes-Regular.ttf` | Great Vibes (latin) — the issuer name above the signature line | © 2010 The Great Vibes Pro Project Authors (github.com/googlefonts/great-vibes) |
 | `NotoSansBengali-Bold.ttf` | Noto Sans Bengali Bold (bengali + latin) | © 2025 The Noto Project Authors (github.com/notofonts/bengali) |
 
 Built from the @fontsource npm packages (woff2 subsets merged to TTF with fontTools).

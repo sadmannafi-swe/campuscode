@@ -43,11 +43,12 @@ async function fetchAsset(path: string): Promise<Uint8Array> {
 }
 function loadAssets(): Promise<CertificateAssets> {
   assetsPromise ??= (async () => {
-    const [template, display, serif, fallback] = await Promise.all([
+    const [template, display, serif, fallback, script] = await Promise.all([
       fetchAsset("template.pdf"), fetchAsset("fonts/Jersey10.ttf"),
       fetchAsset("fonts/Lora-Regular.ttf"), fetchAsset("fonts/NotoSansBengali-Bold.ttf"),
+      fetchAsset("fonts/GreatVibes-Regular.ttf"),
     ]);
-    return { template, display, serif, fallback };
+    return { template, display, serif, fallback, script };
   })().catch((e) => { assetsPromise = null; throw e; });
   return assetsPromise;
 }

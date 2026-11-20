@@ -20,6 +20,8 @@ export const LAYOUT = {
   verification: { x: 27, baseline: 192.4, size: 8.5, minSize: 6, maxWidth: 103 },
   /** QR code, centred in the "SCAN TO VERIFY" frame (frame: x 133.6, y 161.4, 29.9 × 28.5 mm). */
   qr: { cx: 148.55, cy: 175.65, size: 22.5 },
+  /** Issuer name set in a script face on the signature line (line at y = 173.9 mm, centred at 232.6 mm). */
+  signature: { cx: 232.6, baseline: 172.3, size: 30, text: "Nafi" },
   /** Line under "AUTHORIZED ISSUER" — Lora 10.37 pt, centred at 232.5 mm, baseline 186.82 mm. */
   issuer: { cx: 232.5, baseline: 186.82, size: 10.37, minSize: 7, maxWidth: 72 },
 } as const;

@@ -27,6 +27,11 @@ export function CertificatePreview({ name, course, className, alt }: { name: str
       <img src="/certificate/preview.jpg" alt={alt} loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" />
       <p aria-hidden className="absolute truncate text-center leading-none text-[#172733]" style={line(99.28, 9.14)}>{name}</p>
       <p aria-hidden className="absolute truncate text-center leading-none text-[#172733]" style={line(126.54, 7.79)}>{course}</p>
+      {/* Issuer name on the signature line, as on the PDF (Great Vibes 30 pt, baseline 172.3 mm, centred at 232.6 mm). */}
+      <p aria-hidden className="absolute text-center leading-none text-[#172733]" style={{
+        top: `${(172.3 - 0.725 * 30 * 0.3528) * MM}cqw`, left: `${(232.6 - 30) * MM}cqw`, width: `${60 * MM}cqw`,
+        fontSize: `${30 * 0.3528 * MM}cqw`, fontFamily: '"CC Certificate Script", cursive',
+      }}>Nafi</p>
     </figure>
   );
 }
