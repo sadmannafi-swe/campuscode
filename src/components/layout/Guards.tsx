@@ -18,9 +18,9 @@ export function RequireAuth({ children }: { children: ReactNode }) {
 export function RequireAdmin({ children }: { children: ReactNode }) {
   const { user, isAdmin, loading } = useAuth();
   const { t } = useI18n();
-  const location = useLocation();
   if (loading) return <PageLoader />;
-  if (!user) return <Navigate to={`/login?next=${encodeURIComponent(location.pathname)}`} replace />;
+  // Administrators sign in only through /ccadmingo.
+  if (!user) return <Navigate to="/ccadmingo" replace />;
   if (!isAdmin) {
     return (
       <div className="page">

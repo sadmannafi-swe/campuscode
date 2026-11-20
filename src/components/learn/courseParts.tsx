@@ -6,9 +6,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { getMyLessonProgress } from "@/services/courses";
 import { listCourseVideos } from "@/services/videos";
+import { getCourseQuizOverview } from "@/services/quizzes";
 import { formatClock } from "@/lib/youtube";
 import { pick } from "@/lib/utils";
-import type { LearningVideo, LessonProgress, LessonSummary } from "@/types/db";
+import type { LearningVideo, LessonProgress, LessonSummary, ModuleOverview } from "@/types/db";
 
 export const pad = (x: number) => String(x).padStart(2, "0");
 
@@ -22,6 +23,19 @@ export function useCourseVideos(courseId: string | undefined) {
       byLesson: new Map(list.filter((v) => v.lesson_id && v.is_published).map((v) => [v.lesson_id!, v])),
     };
   }, [q.data]);
+}
+
+/** Per-module unlock + quiz status for the signed-in student (empty for guests: nothing is locked for reading). */
+export function useModuleOverview(courseId: string | undefined) {
+  const { user } = useAuth();
+  const q = useQuery({
+    queryKey: ["quiz-overview", courseId, user?.id], enabled: Boolean(courseId && user),
+    queryFn: () => getCourseQuizOverview(courseId!),
+  });
+  return useMemo(() => ({
+    byChapter: new Map<string, ModuleOverview>((q.data ?? []).map((m) => [m.chapter_id, m])),
+    loading: q.isLoading && Boolean(courseId && user),
+  }), [q.data, q.isLoading, courseId, user]);
 }
 
 /** The signed-in student's lesson states (empty for guests). */

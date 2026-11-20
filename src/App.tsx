@@ -24,6 +24,7 @@ const LearnPage = lazy(() => import("@/pages/learn/LearnPage"));
 const CoursePage = lazy(() => import("@/pages/learn/CoursePage"));
 const LessonPage = lazy(() => import("@/pages/learn/LessonPage"));
 const ChapterPage = lazy(() => import("@/pages/learn/ChapterPage"));
+const QuizPage = lazy(() => import("@/pages/learn/QuizPage"));
 const PracticePage = lazy(() => import("@/pages/learn/PracticePage"));
 const PracticeTopicPage = lazy(() => import("@/pages/learn/PracticeTopicPage"));
 const SnippetsPage = lazy(() => import("@/pages/SnippetsPage"));
@@ -32,6 +33,7 @@ const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
 const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"));
 const AdminApp = lazy(() => import("@/pages/admin/AdminApp"));
 const VerifyCertificatePage = lazy(() => import("@/pages/VerifyCertificatePage"));
+const AdminGatePage = lazy(() => import("@/pages/auth/AdminGatePage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -55,6 +57,7 @@ export function App() {
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/ide" element={<IdePage />} />
+                <Route path="/ccadmingo" element={<AdminGatePage />} />
                 <Route path="/admin/*" element={<RequireAdmin><AdminApp /></RequireAdmin>} />
                 <Route element={<AppShell />}>
                   <Route index element={<S><HomePage /></S>} />
@@ -67,6 +70,7 @@ export function App() {
                   <Route path="learn" element={<S><LearnPage /></S>} />
                   <Route path="learn/:courseSlug" element={<S><CoursePage /></S>} />
                   <Route path="learn/:courseSlug/chapter/:chapterSlug" element={<S><ChapterPage /></S>} />
+                  <Route path="learn/:courseSlug/chapter/:chapterSlug/quiz" element={<S><QuizPage /></S>} />
                   <Route path="learn/:courseSlug/:lessonSlug" element={<S><LessonPage /></S>} />
                   <Route path="practice" element={<S><PracticePage /></S>} />
                   <Route path="practice/:topicSlug" element={<S><PracticeTopicPage /></S>} />

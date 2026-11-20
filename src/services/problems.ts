@@ -14,7 +14,8 @@ export async function listTopics(): Promise<Topic[]> {
 
 export async function listPublishedProblems(): Promise<ProblemListItem[]> {
   const { data, error } = await supabase.from("problems").select(LIST_FIELDS)
-    .eq("status", "published").order("is_official", { ascending: false }).order("created_at").limit(1000);
+    .eq("status", "published").eq("is_quiz_item", false)   // module-quiz problems are reached from their quiz
+    .order("is_official", { ascending: false }).order("created_at").limit(1000);
   if (error) throw error;
   return data as ProblemListItem[];
 }

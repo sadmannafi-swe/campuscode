@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Bookmark, BookmarkCheck, Flag, Lightbulb, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bookmark, BookmarkCheck, ClipboardCheck, Flag, Lightbulb, Pencil, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import { friendlyError } from "@/lib/errors";
 import { cn, formatMemory, langLabel, pick } from "@/lib/utils";
 import type { Lang, ProblemReport } from "@/types/db";
 import NotFoundPage from "../NotFoundPage";
+import { getQuizAttempt } from "@/services/quizzes";
 
 export default function ProblemDetailPage() {
   const { slug } = useParams();
@@ -28,6 +29,9 @@ export default function ProblemDetailPage() {
   const qc = useQueryClient();
   const [language, setLanguage] = useState<Lang>("c");
   const [hintsShown, setHintsShown] = useState(0);
+  // Opened from a module quiz ("Solve in IDE"): show the way back. Grading happens on the server.
+  const quizAttemptId = useSearchParams()[0].get("quiz");
+  const quizAttempt = useQuery({ queryKey: ["quiz-attempt", quizAttemptId], enabled: Boolean(quizAttemptId && user), queryFn: () => getQuizAttempt(quizAttemptId!) });
   const [reportOpen, setReportOpen] = useState(false);
   const [reason, setReason] = useState<ProblemReport["reason"]>("incorrect");
   const [details, setDetails] = useState("");
@@ -92,7 +96,14 @@ export default function ProblemDetailPage() {
 
   return (
     <div className="page">
-      <Link to="/problems" className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-slate hover:text-ink"><ArrowLeft className="size-4" />{t("nav.problems")}</Link>
+      {quizAttempt.data ? (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-lime/60 bg-lime/10 px-4 py-3 text-sm" data-testid="quiz-banner">
+          <p className="flex items-start gap-2"><ClipboardCheck className="mt-0.5 size-4 shrink-0" aria-hidden />{t("quiz.partOfQuiz")}</p>
+          <Button asChild size="sm" variant="ink"><Link to={`/learn/${quizAttempt.data.quiz.course_slug}/chapter/${quizAttempt.data.quiz.chapter_slug}/quiz?attempt=${quizAttempt.data.id}`}><ArrowLeft /> {t("quiz.backToQuiz")}</Link></Button>
+        </div>
+      ) : (
+        <Link to="/problems" className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-slate hover:text-ink"><ArrowLeft className="size-4" />{t("nav.problems")}</Link>
+      )}
 
       {statusNote && (
         <div className={cn("mb-4 rounded-md border px-4 py-3 text-sm", problem.status === "rejected" || problem.status === "removed" ? "border-error/30 bg-error/5" : "border-warning/30 bg-warning/5")}>

@@ -93,20 +93,29 @@ export function CourseCertificateCard({ courseId }: { courseId: string }) {
       <div className="mt-6 grid gap-8 lg:grid-cols-2">
         <ul aria-label={t("cert.courseTitle")}>
           <Req done={p.lessons.done === p.lessons.total}>{t("cert.reqLessons")} <span className="font-mono text-xs text-paper/50">· {n(p.lessons.done)}/{n(p.lessons.total)}</span></Req>
-          <Req done={p.practice.done === p.practice.total}>{t("cert.reqPractice")} <span className="font-mono text-xs text-paper/50">· {n(p.practice.done)}/{n(p.practice.total)}</span></Req>
-          <Req done={p.assessment.passed}>
-            {t("cert.reqAssessment", { pass: n(Number(pass)) })}
-            <span className="block font-mono text-xs text-paper/50">
-              {p.assessment.score === null || p.assessment.attempted === 0 ? t("cert.notAttempted") : t("cert.score", { score: n(Number(p.assessment.score)) })}
-            </span>
-          </Req>
+          {(p.quizzes?.total ?? 0) > 0 && (
+            <Req done={p.quizzes!.passed === p.quizzes!.total}>{t("cert.reqQuizzes")} <span className="font-mono text-xs text-paper/50">· {n(p.quizzes!.passed)}/{n(p.quizzes!.total)}</span></Req>
+          )}
+          {p.practice.total > 0 && (
+            <Req done={p.practice.done === p.practice.total}>{t("cert.reqPractice")} <span className="font-mono text-xs text-paper/50">· {n(p.practice.done)}/{n(p.practice.total)}</span></Req>
+          )}
+          {p.assessment.total > 0 && (
+            <Req done={p.assessment.passed}>
+              {t("cert.reqAssessment", { pass: n(Number(pass)) })}
+              <span className="block font-mono text-xs text-paper/50">
+                {p.assessment.score === null || p.assessment.attempted === 0 ? t("cert.notAttempted") : t("cert.score", { score: n(Number(p.assessment.score)) })}
+              </span>
+            </Req>
+          )}
           {!p.name_present && <Req done={false}><Link to="/profile/settings" className="underline decoration-lime underline-offset-4">{t("cert.reqName")}</Link></Req>}
         </ul>
-        <div className="space-y-5">
-          <ProblemList title={t("cert.practiceProblems")} items={practice} ratios={ratios.data ?? new Map()} />
-          <ProblemList title={t("cert.assessmentProblems")} items={assessment} ratios={ratios.data ?? new Map()} />
-          <p className="text-xs text-paper/50">{t("cert.howScored")}</p>
-        </div>
+        {(practice.length > 0 || assessment.length > 0) && (
+          <div className="space-y-5">
+            <ProblemList title={t("cert.practiceProblems")} items={practice} ratios={ratios.data ?? new Map()} />
+            <ProblemList title={t("cert.assessmentProblems")} items={assessment} ratios={ratios.data ?? new Map()} />
+            {assessment.length > 0 && <p className="text-xs text-paper/50">{t("cert.howScored")}</p>}
+          </div>
+        )}
       </div>
     </section>
   );

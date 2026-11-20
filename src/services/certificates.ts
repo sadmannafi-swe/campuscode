@@ -123,7 +123,7 @@ export async function adminRevokeCertificate(id: string, reason: string) {
 export interface AdminCertificateCourse {
   course_id: string; slug: string; title_en: string; language: string;
   config: { configured: boolean; missing: string[]; enabled: boolean; passing_score: number;
-            issuer_designation: string | null; lessons: number; practice: number; assessment: number };
+            issuer_designation: string | null; lessons: number; quizzes?: number; practice: number; assessment: number };
   issued: number; revoked: number;
 }
 

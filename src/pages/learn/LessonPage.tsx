@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { AlertTriangle, ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Code2, ListChecks, PlayCircle, Target } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ClipboardCheck, Code2, ListChecks, Lock, PlayCircle, Target } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { Button } from "@/components/ui/button";
@@ -19,11 +19,17 @@ import { LessonVideo } from "@/components/learn/LessonVideo";
 import { getVideoProgress, listCourseVideos } from "@/services/videos";
 import { formatClock } from "@/lib/youtube";
 import NotFoundPage from "../NotFoundPage";
+import { useModuleOverview } from "@/components/learn/courseParts";
+import { lockedModuleError } from "@/services/quizzes";
 
 /** Completion + previous/next — sits directly under the lesson video (or the lesson header when there is none). */
-function LessonActions({ courseSlug, lessonSlug, prev, next, completed, signedIn, onComplete, completing }: {
+function LessonActions({ courseSlug, lessonSlug, prev, next, completed, signedIn, onComplete, completing, locked, quizHref }: {
   courseSlug: string; lessonSlug: string; prev: LessonSummary | null; next: LessonSummary | null;
   completed: boolean; signedIn: boolean; onComplete: () => void; completing: boolean;
+  /** Module locked for this student: readable, but completion waits for the previous module quiz. */
+  locked?: boolean;
+  /** Set on a module's last lesson while its quiz is not passed: "Next" leads to the quiz. */
+  quizHref?: string | null;
 }) {
   const { t, lang, n } = useI18n();
   const navBtn = "h-12 min-w-0 w-full justify-start gap-3 px-4 sm:w-auto sm:max-w-[260px]";
@@ -41,6 +47,8 @@ function LessonActions({ courseSlug, lessonSlug, prev, next, completed, signedIn
           <p className="text-sm text-slate"><Link to={`/login?next=${encodeURIComponent(`/learn/${courseSlug}/${lessonSlug}`)}`} className="font-semibold text-ink underline decoration-lime decoration-2 underline-offset-4">{t("nav.signIn")}</Link> — {t("learn.signInToTrack")}</p>
         ) : completed ? (
           <p role="status" className="inline-flex h-12 items-center gap-2 font-semibold text-success"><CheckCircle2 className="size-5" />{t("learn.completed")}</p>
+        ) : locked ? (
+          <p className="flex items-start gap-2 text-sm text-slate" data-testid="lesson-locked"><Lock className="mt-0.5 size-4 shrink-0" aria-hidden />{t("learn.moduleLocked")}</p>
         ) : (
           <Button variant="lime" size="lg" className="w-full sm:w-auto" onClick={onComplete} loading={completing}><CheckCircle2 /> {t("learn.markComplete")}</Button>
         )}
@@ -51,7 +59,13 @@ function LessonActions({ courseSlug, lessonSlug, prev, next, completed, signedIn
         ) : (
           <Button variant="outline" className={navBtn} disabled aria-disabled="true"><ArrowLeft />{label("prev", null)}</Button>
         )}
-        {next ? (
+        {quizHref ? (
+          <Button asChild variant="ink" className={cn(navBtn, "justify-end")}><Link to={quizHref}>
+            <span className="flex min-w-0 flex-col items-end text-right leading-tight">
+              <span className="text-[11px] font-semibold uppercase tracking-wide opacity-70">{t("learn.nextLesson")}</span>
+              <span className="max-w-full truncate text-sm">{t("quiz.takeQuiz")}</span>
+            </span><ClipboardCheck /></Link></Button>
+        ) : next ? (
           <Button asChild variant="ink" className={cn(navBtn, "justify-end")}><Link to={`/learn/${courseSlug}/${next.slug}`} rel="next">{label("next", next)}<ArrowRight /></Link></Button>
         ) : (
           <Button variant="ink" className={cn(navBtn, "justify-end")} disabled aria-disabled="true">{label("next", null)}<ArrowRight /></Button>
@@ -150,6 +164,7 @@ export default function LessonPage() {
   const topics = useQuery({ queryKey: ["topics"], queryFn: listTopics, staleTime: 600_000 });
   const courseId = outline.data?.course.id;
   const videos = useQuery({ queryKey: ["course-videos", courseId], enabled: Boolean(courseId), queryFn: () => listCourseVideos(courseId!) });
+  const modules = useModuleOverview(courseId);
 
   const lesson = lessonQ.data?.lesson;
   const lessonVideo = videos.data?.find((v) => v.lesson_id === lesson?.id && v.is_published) ?? null;
@@ -182,7 +197,7 @@ export default function LessonPage() {
     onSuccess: () => toast.success(t("learn.completed")),
     onError: (e, _v, ctx) => {
       if (ctx?.previous) qc.setQueryData(progressKey, ctx.previous);
-      toast.error(friendlyError(e, t));
+      toast.error(friendlyError(lockedModuleError(e) ?? e, t));
     },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ["progress"] });          // lesson states + course progress
@@ -190,6 +205,7 @@ export default function LessonPage() {
       qc.invalidateQueries({ queryKey: ["notifications"] });
       qc.invalidateQueries({ queryKey: ["certificate-progress"] });
       qc.invalidateQueries({ queryKey: ["certificates"] });
+      qc.invalidateQueries({ queryKey: ["quiz-overview"] });
     },
   });
 
@@ -222,9 +238,13 @@ export default function LessonPage() {
     </section>
   );
   const doneCount = (progress.data ?? []).filter((p) => p.state === "completed" && outline.data!.lessons.some((l) => l.id === p.lesson_id)).length;
+  const mod = chapter ? modules.byChapter.get(chapter.id) : undefined;
+  const quizHref = user && chapter && mod?.quiz && mod.quiz.status !== "passed" && (!next || next.chapter_id !== chapter.id)
+    ? `/learn/${courseSlug}/chapter/${chapter.slug}/quiz` : null;
   const actions = (
     <LessonActions courseSlug={courseSlug!} lessonSlug={lessonSlug!} prev={prev} next={next} completed={Boolean(completed)}
-      signedIn={Boolean(user)} onComplete={() => complete.mutate()} completing={complete.isPending} />
+      signedIn={Boolean(user)} onComplete={() => complete.mutate()} completing={complete.isPending}
+      locked={Boolean(user && mod && !mod.unlocked)} quizHref={quizHref} />
   );
 
   return (

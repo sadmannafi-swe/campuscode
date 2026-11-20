@@ -16,7 +16,8 @@ function CertificateCard({ c }: { c: MyCertificate }) {
   const { t, lang } = useI18n();
   const [busy, setBusy] = useState<"view" | "download" | null>(null);
   const url = verificationUrl(c.verification_token);
-  const valid = c.status === "valid";
+  const pending = c.status === "valid" && !c.has_pdf;   // issued only once its PDF is stored
+  const valid = c.status === "valid" && !pending;
 
   const open = async (mode: "view" | "download") => {
     setBusy(mode);
@@ -33,18 +34,19 @@ function CertificateCard({ c }: { c: MyCertificate }) {
     <article className="surface flex flex-col overflow-hidden" aria-label={c.course_title}>
       <div className="border-b border-line bg-paper p-3">
         <CertificatePreview name={c.student_name} course={c.course_title} alt={t("cert.previewAlt", { course: c.course_title })}
-          className={valid ? "" : "opacity-50 grayscale"} />
+          className={valid ? "" : pending ? "opacity-70" : "opacity-50 grayscale"} />
       </div>
       <div className="flex flex-1 flex-col p-4">
         <div className="flex items-start justify-between gap-3">
           <h3 className="font-heading text-lg font-bold leading-snug">{c.course_title}</h3>
-          <Badge tone={valid ? "success" : "error"} className="shrink-0">{valid ? t("cert.valid") : t("cert.revoked")}</Badge>
+          <Badge tone={pending ? "warning" : valid ? "success" : "error"} className="shrink-0">{pending ? t("cert.pending") : valid ? t("cert.valid") : t("cert.revoked")}</Badge>
         </div>
         <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-          <dt className="text-slate">{t("verify.issueDate")}</dt><dd>{formatDate(c.issued_at, lang)}</dd>
+          {!pending && <><dt className="text-slate">{t("verify.issueDate")}</dt><dd>{formatDate(c.issued_at, lang)}</dd></>}
           <dt className="text-slate">{t("cert.id")}</dt><dd className="font-mono text-[13px]">{c.certificate_number}</dd>
         </dl>
-        {!valid && <p className="mt-3 text-sm text-error">{t("cert.revokedNote")}</p>}
+        {pending && <p className="mt-3 text-sm text-slate" role="status">{t("cert.pendingNote")}</p>}
+        {!valid && !pending && <p className="mt-3 text-sm text-error">{t("cert.revokedNote")}</p>}
         <div className="mt-auto flex flex-wrap gap-2 pt-4">
           {valid && (
             <>
@@ -56,7 +58,7 @@ function CertificateCard({ c }: { c: MyCertificate }) {
               </Button>
             </>
           )}
-          <Button size="sm" variant="ghost" onClick={copy}><Copy /> {t("cert.copyLink")}</Button>
+          {!pending && <Button size="sm" variant="ghost" onClick={copy}><Copy /> {t("cert.copyLink")}</Button>}
         </div>
       </div>
     </article>
@@ -66,7 +68,11 @@ function CertificateCard({ c }: { c: MyCertificate }) {
 /** "My certificates" section of the profile. Opening it asks the server to re-check eligibility. */
 export function MyCertificates({ userId }: { userId: string }) {
   const { t } = useI18n();
-  const q = useQuery({ queryKey: ["certificates", userId], queryFn: syncMyCertificates, staleTime: 60_000 });
+  const q = useQuery({
+    queryKey: ["certificates", userId], queryFn: syncMyCertificates, staleTime: 60_000,
+    // While a certificate's PDF is still being generated, check again every 15 s.
+    refetchInterval: (query) => (query.state.data?.certificates.some((c) => c.status === "valid" && !c.has_pdf) ? 15_000 : false),
+  });
 
   // Notifications link to /profile#certificates: scroll there once the list has rendered.
   useEffect(() => {

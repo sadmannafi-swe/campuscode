@@ -23,12 +23,13 @@ const MISSING: Record<string, string> = {
   certificates_disabled: "Certificates are turned off for this course",
   course_unpublished: "The course is not published",
   no_published_lessons: "The course has no published lessons",
+  no_verified_requirement: "No server-verified requirement: add module quizzes or final-assessment problems",
   no_practice_requirements: "No required practice problems",
   no_final_assessment: "No final-assessment problems",
 };
 
 const EVENT_LABEL: Record<string, string> = {
-  issued: "Issued automatically", pdf_generated: "PDF generated", pdf_failed: "PDF generation failed",
+  queued: "Course completed, PDF queued", issued: "Issued (PDF stored, student notified)", pdf_generated: "PDF generated", pdf_failed: "PDF generation failed",
   revoked: "Revoked", issue_failed: "Issuance error",
 };
 
@@ -271,11 +272,11 @@ function CourseEditor({ course, onChanged }: { course: AdminCertificateCourse; o
 
       <section className="grid gap-6 lg:grid-cols-2">
         <div>
-          <p className="eyebrow mb-2">Required practice (must be solved)</p>
+          <p className="eyebrow mb-2">Required practice (optional, must be solved)</p>
           {list("practice")}
         </div>
         <div>
-          <p className="eyebrow mb-2">Final assessment (score = weighted share of tests passed)</p>
+          <p className="eyebrow mb-2">Final assessment (optional; score = weighted share of tests passed)</p>
           {list("assessment")}
         </div>
       </section>
@@ -316,7 +317,7 @@ function CourseRequirements({ courses, refetch }: { courses: AdminCertificateCou
               <span className="block font-semibold">{c.title_en}</span>
               <span className="mt-1 flex flex-wrap items-center gap-2 text-xs">
                 <Badge tone={c.config.configured ? "success" : "warning"}>{c.config.configured ? "ready" : "not configured"}</Badge>
-                <span className={selected === c.course_id ? "text-paper/60" : "text-slate"}>{c.issued} issued · {c.revoked} revoked</span>
+                <span className={selected === c.course_id ? "text-paper/60" : "text-slate"}>{c.config.quizzes ?? 0} quizzes · {c.issued} issued · {c.revoked} revoked</span>
               </span>
             </button>
           </li>

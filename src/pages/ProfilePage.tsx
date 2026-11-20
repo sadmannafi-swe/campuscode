@@ -179,8 +179,12 @@ export default function ProfilePage() {
               const p = progress.data?.find((x) => x.course_id === c.id);
               return (
                 <Link key={c.id} to={`/learn/${c.slug}`} className="surface block p-4 hover:border-ink/30">
-                  <div className="flex justify-between text-sm font-semibold"><span>{pick(c, "title", lang)}</span><span className="font-mono text-xs text-slate">{n(p?.completed ?? 0)}/{n(p?.total ?? 0)}</span></div>
-                  <ProgressBar className="mt-3" value={p?.completed ?? 0} max={p?.total ?? 1} />
+                  <div className="flex justify-between gap-3 text-sm font-semibold"><span>{pick(c, "title", lang)}</span>
+                    {p?.completed_at
+                      ? <span className="inline-flex items-center gap-1 text-xs text-success"><CheckCircle2 className="size-3.5" />{t("learn.courseCompleted")}</span>
+                      : <span className="font-mono text-xs text-slate">{n(p?.completed ?? 0)}/{n(p?.total ?? 0)}{p?.quizzes_total ? ` · ${n(p.quizzes_passed)}/${n(p.quizzes_total)} ${t("nav.quizzesShort")}` : ""}</span>}
+                  </div>
+                  <ProgressBar className="mt-3" value={(p?.completed ?? 0) + (p?.quizzes_passed ?? 0)} max={Math.max((p?.total ?? 0) + (p?.quizzes_total ?? 0), 1)} />
                 </Link>
               );
             })}

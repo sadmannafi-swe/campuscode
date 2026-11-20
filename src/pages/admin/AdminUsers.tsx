@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Search, Shield, ShieldOff, UserCheck, UserX } from "lucide-react";
+import { Search, UserCheck, UserX } from "lucide-react";
 import { listUsers, setAdminRole, setUserStatus, type AdminUserRow } from "@/services/admin";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
@@ -13,6 +13,7 @@ import { Avatar } from "@/components/common/Avatar";
 import { friendlyError } from "@/lib/errors";
 import { formatDate } from "@/lib/utils";
 
+// The administrator is fixed by the one-time /ccadmingo setup; roles can't be granted from here.
 type Action = { user: AdminUserRow; kind: "suspend" | "activate" | "grant" | "revoke" };
 
 export default function AdminUsers() {
@@ -61,9 +62,6 @@ export default function AdminUsers() {
                       {u.status === "active"
                         ? <Button size="sm" variant="outline" onClick={() => setAction({ user: u, kind: "suspend" })}><UserX /> Suspend</Button>
                         : <Button size="sm" variant="outline" onClick={() => setAction({ user: u, kind: "activate" })}><UserCheck /> Activate</Button>}
-                      {u.is_admin
-                        ? <Button size="sm" variant="ghost" onClick={() => setAction({ user: u, kind: "revoke" })}><ShieldOff /> Revoke admin</Button>
-                        : <Button size="sm" variant="ghost" onClick={() => setAction({ user: u, kind: "grant" })}><Shield /> Make admin</Button>}
                     </>
                   )}
                 </div>

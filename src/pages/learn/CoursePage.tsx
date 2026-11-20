@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, PlayCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Lock, PlayCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { Button } from "@/components/ui/button";
@@ -11,19 +11,31 @@ import { friendlyError } from "@/lib/errors";
 import { cn, pick } from "@/lib/utils";
 import NotFoundPage from "../NotFoundPage";
 import { LessonVideo } from "@/components/learn/LessonVideo";
-import { LessonRow, lessonRange, pad, useCourseVideos, useLessonStates } from "@/components/learn/courseParts";
+import { LessonRow, lessonRange, pad, useCourseVideos, useLessonStates, useModuleOverview } from "@/components/learn/courseParts";
+import { QuizStatusBadge } from "./QuizPage";
+import { getCourseProgress } from "@/services/courses";
 import { CourseCertificateCard } from "@/components/certificates/CourseCertificateCard";
 
 function Header({ outline, done }: { outline: CourseOutline; done: number }) {
-  const { t } = useI18n();
+  const { t, n } = useI18n();
   const { user } = useAuth();
+  const modules = useModuleOverview(outline.course.id);
+  const progress = useQuery({ queryKey: ["progress", "courses", user?.id], enabled: Boolean(user), queryFn: getCourseProgress });
+  const quizzes = [...modules.byChapter.values()].filter((m) => m.quiz);
+  const passed = quizzes.filter((m) => m.quiz!.status === "passed").length;
+  const completedAt = progress.data?.find((p) => p.course_id === outline.course.id)?.completed_at;
   return (
     <div className="mb-10">
       <Link to="/learn" className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-paper/60 hover:text-paper"><ArrowLeft className="size-4" />{t("learn.title")}</Link>
       {user && (
-        <div className="mt-6 max-w-md">
-          <ProgressBar dark value={done} max={outline.lessons.length} />
-          <p className="mt-2 font-mono text-xs text-paper/60">{t("learn.progress", { done, total: outline.lessons.length })}</p>
+        <div className="mt-6 max-w-md" data-testid="course-progress">
+          {completedAt && <p className="mb-2 inline-flex items-center gap-1.5 rounded bg-lime/15 px-2.5 py-1 text-sm font-semibold text-lime"><CheckCircle2 className="size-4" />{t("learn.courseCompleted")} · 100%</p>}
+          <ProgressBar dark value={done + passed} max={Math.max(outline.lessons.length + quizzes.length, 1)} />
+          <p className="mt-2 font-mono text-xs text-paper/60">
+            {quizzes.length
+              ? t("learn.courseProgressFull", { lessons: n(done), lessonsTotal: n(outline.lessons.length), quizzes: n(passed), quizzesTotal: n(quizzes.length) })
+              : t("learn.progress", { done, total: outline.lessons.length })}
+          </p>
         </div>
       )}
     </div>
@@ -36,6 +48,7 @@ function CRoadmap({ outline }: { outline: CourseOutline }) {
   const done = outline.lessons.filter((l) => progress.get(l.id) === "completed").length;
   const resume = outline.lessons.find((l) => progress.get(l.id) !== "completed") ?? outline.lessons[0];
   const videos = useCourseVideos(outline.course.id);
+  const modules = useModuleOverview(outline.course.id);
   return (
     <>
       <Header outline={outline} done={done} />
@@ -58,18 +71,23 @@ function CRoadmap({ outline }: { outline: CourseOutline }) {
           const [first, last] = lessonRange(ch.lessons);
           const chDone = ch.lessons.filter((l) => progress.get(l.id) === "completed").length;
           const withVideo = ch.lessons.filter((l) => videos.byLesson.has(l.id)).length;
+          const mod = modules.byChapter.get(ch.id);
           return (
             <Link key={ch.id} to={`/learn/${outline.course.slug}/chapter/${ch.slug}`}
               aria-label={`${pick(ch, "title", lang)} — ${t("learn.lessonsRange", { from: n(pad(first)), to: n(pad(last)) })}`}
               className="group relative flex flex-col rounded border border-ink-600 bg-ink-800 p-6 text-left transition-all duration-150
                 hover:-translate-y-0.5 hover:border-lime/60 hover:bg-ink-700 hover:shadow-[0_8px_24px_-16px_rgba(183,243,107,0.5)]
                 active:translate-y-0 active:scale-[0.98] active:border-lime active:bg-ink-600">
-              <span className="font-mono text-sm font-medium text-lime">{n(pad(first))}{first !== last && `–${n(pad(last))}`}</span>
+              <span className="flex items-center gap-2 font-mono text-sm font-medium text-lime">
+                {mod && !mod.unlocked && <Lock className="size-3.5 text-paper/50" aria-label={t("quiz.status.locked")} />}
+                {n(pad(first))}{first !== last && `–${n(pad(last))}`}
+              </span>
               <span className="mt-3 block pr-6 font-heading text-lg font-bold text-paper">{pick(ch, "title", lang)}</span>
               <span className="mt-1 flex items-center gap-3 text-xs text-paper/50">
                 <span>{n(chDone)}/{n(ch.lessons.length)}</span>
                 {withVideo > 0 && <span className="inline-flex items-center gap-1"><PlayCircle className="size-3" aria-hidden />{t("learn.videosCount", { n: withVideo })}</span>}
               </span>
+              {mod?.quiz && <span className="mt-3 flex items-center gap-2 text-xs text-paper/50">{t("quiz.moduleQuiz", { n: n(mod.sort_order) })}<QuizStatusBadge status={mod.quiz.status} className="h-5 px-2 text-[11px]" /></span>}
               <ArrowRight className="absolute right-5 top-6 size-4 text-paper/30 transition-all group-hover:translate-x-0.5 group-hover:text-lime" aria-hidden />
             </Link>
           );

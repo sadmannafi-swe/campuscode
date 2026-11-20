@@ -290,6 +290,10 @@ export interface CourseProgress {
   total: number;
   completed: number;
   last_lesson_id: string | null;
+  quizzes_total: number;
+  quizzes_passed: number;
+  /** Trusted completion timestamp (all lessons, all module quizzes and configured requirements). */
+  completed_at: string | null;
 }
 
 // Edge function payloads -------------------------------------------------
@@ -404,6 +408,8 @@ export interface CertificateProgress {
   practice: { done: number; total: number };
   assessment: { score: number | null; passing_score: number; attempted: number; total: number; passed: boolean };
   certificate: { id: string; certificate_number: string; status: CertificateStatus; issued_at: string } | null;
+  quizzes?: { passed: number; total: number };
+  course_completed_at?: string | null;
 }
 
 export interface CourseCertificateSettings {
@@ -420,4 +426,66 @@ export interface CourseRequirement {
   weight: number;
   sort_order: number;
   problems: { id: string; slug: string; title: string; difficulty: Difficulty; status: ProblemStatus } | null;
+}
+
+// ---------- Module quizzes -------------------------------------------
+export type QuizStatus = "locked" | "available" | "in_progress" | "passed" | "failed";
+
+export interface ModuleQuizStatus {
+  quiz_id: string;
+  chapter_id: string;
+  title_en: string;
+  title_bn: string;
+  status: QuizStatus;
+  module_unlocked: boolean;
+  lessons_done: number;
+  lessons_total: number;
+  question_count: number;
+  pass_min_correct: number;
+  attempts: number;
+  open_attempt_id: string | null;
+  passed_at: string | null;
+  latest: { attempt_id: string; status: "passed" | "failed"; correct: number; total: number; score: number; submitted_at: string } | null;
+}
+
+export interface ModuleOverview {
+  chapter_id: string;
+  chapter_slug: string;
+  sort_order: number;
+  unlocked: boolean;
+  quiz: ModuleQuizStatus | null;
+}
+
+export interface QuizCodeEvaluation {
+  accepted: boolean;
+  attempts: number;
+  latest: { submission_id: string; verdict: Verdict; passed: number; total: number; created_at: string } | null;
+}
+
+export interface QuizAttemptQuestion {
+  id: string;
+  number: number;
+  kind: "mcq" | "code";
+  prompt: string;
+  code: string | null;
+  options?: { id: string; text: string }[];
+  selected?: string | null;
+  problem?: { id: string; slug: string; title: string; title_bn: string | null };
+  evaluation?: QuizCodeEvaluation;
+  // present only after submission
+  correct_option?: string;
+  is_correct?: boolean;
+  explanation?: string;
+}
+
+export interface QuizAttempt {
+  id: string;
+  status: "in_progress" | "passed" | "failed";
+  started_at: string;
+  submitted_at: string | null;
+  correct: number | null;
+  total: number;
+  score: number | null;
+  quiz: { id: string; title_en: string; title_bn: string; pass_min_correct: number; chapter_id: string; course_id: string; chapter_slug: string; course_slug: string };
+  questions: QuizAttemptQuestion[];
 }
