@@ -23,6 +23,7 @@ const SubmissionsPage = lazy(() => import("@/pages/problems/SubmissionsPage"));
 const LearnPage = lazy(() => import("@/pages/learn/LearnPage"));
 const CoursePage = lazy(() => import("@/pages/learn/CoursePage"));
 const LessonPage = lazy(() => import("@/pages/learn/LessonPage"));
+const ChapterPage = lazy(() => import("@/pages/learn/ChapterPage"));
 const PracticePage = lazy(() => import("@/pages/learn/PracticePage"));
 const PracticeTopicPage = lazy(() => import("@/pages/learn/PracticeTopicPage"));
 const SnippetsPage = lazy(() => import("@/pages/SnippetsPage"));
@@ -64,6 +65,7 @@ export function App() {
                   <Route path="submissions" element={<RequireAuth><S><SubmissionsPage /></S></RequireAuth>} />
                   <Route path="learn" element={<S><LearnPage /></S>} />
                   <Route path="learn/:courseSlug" element={<S><CoursePage /></S>} />
+                  <Route path="learn/:courseSlug/chapter/:chapterSlug" element={<S><ChapterPage /></S>} />
                   <Route path="learn/:courseSlug/:lessonSlug" element={<S><LessonPage /></S>} />
                   <Route path="practice" element={<S><PracticePage /></S>} />
                   <Route path="practice/:topicSlug" element={<S><PracticeTopicPage /></S>} />

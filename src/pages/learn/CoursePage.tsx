@@ -1,63 +1,17 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, CheckCircle2, Circle, Hammer, PlayCircle, Video } from "lucide-react";
+import { ArrowLeft, ArrowRight, PlayCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { ErrorState, PageLoader, ProgressBar } from "@/components/ui/misc";
-import { getCourseOutline, getMyLessonProgress, type CourseOutline } from "@/services/courses";
+import { getCourseOutline, type CourseOutline } from "@/services/courses";
 import { friendlyError } from "@/lib/errors";
 import { cn, pick } from "@/lib/utils";
-import type { LessonProgress, LessonSummary } from "@/types/db";
 import NotFoundPage from "../NotFoundPage";
-import { listCourseVideos } from "@/services/videos";
 import { LessonVideo } from "@/components/learn/LessonVideo";
-import { formatClock } from "@/lib/youtube";
-import type { LearningVideo } from "@/types/db";
-
-function useCourseVideos(courseId: string) {
-  const q = useQuery({ queryKey: ["course-videos", courseId], queryFn: () => listCourseVideos(courseId) });
-  return useMemo(() => {
-    const list: LearningVideo[] = q.data ?? [];
-    return {
-      intro: list.find((v) => !v.lesson_id && v.is_published) ?? null,
-      byLesson: new Map(list.filter((v) => v.lesson_id && v.is_published).map((v) => [v.lesson_id!, v])),
-    };
-  }, [q.data]);
-}
-
-const pad = (x: number) => String(x).padStart(2, "0");
-
-function LessonRow({ l, courseSlug, state, video }: { l: LessonSummary; courseSlug: string; state?: LessonProgress["state"]; video?: LearningVideo }) {
-  const { t, lang, n } = useI18n();
-  return (
-    <li>
-      <Link to={`/learn/${courseSlug}/${l.slug}`} className="flex items-center gap-4 rounded px-3 py-3 hover:bg-ink-700">
-        <span className="w-7 font-mono text-sm text-lime">{n(pad(l.number))}</span>
-        <span className="min-w-0 flex-1">
-          <span className="block truncate font-semibold">{pick(l, "title", lang)}</span>
-          <span className="block truncate text-xs text-paper/50">{pick(l, "summary", lang)}</span>
-        </span>
-        {l.is_project && <span className="hidden items-center gap-1 rounded bg-ink-700 px-2 py-0.5 text-xs sm:inline-flex"><Hammer className="size-3" />{t("learn.project")}</span>}
-        {video && (
-          <span className="inline-flex shrink-0 items-center gap-1 rounded bg-lime/15 px-2 py-0.5 font-mono text-[11px] text-lime" title={t("video.hasVideo")}>
-            <Video className="size-3" aria-hidden /><span className="sr-only">{t("video.hasVideo")}</span>{video.duration_seconds ? formatClock(video.duration_seconds) : ""}
-          </span>
-        )}
-        <span className="hidden font-mono text-xs text-paper/40 sm:block">{n(l.estimated_minutes)} {t("common.minutes")}</span>
-        {state === "completed" ? <CheckCircle2 className="size-5 shrink-0 text-lime" aria-label={t("learn.completed")} />
-          : state === "started" ? <PlayCircle className="size-5 shrink-0 text-paper/60" /> : <Circle className="size-5 shrink-0 text-paper/25" />}
-      </Link>
-    </li>
-  );
-}
-
-function useProgress() {
-  const { user } = useAuth();
-  const q = useQuery({ queryKey: ["progress", "lessons", user?.id], enabled: Boolean(user), queryFn: () => getMyLessonProgress(user!.id) });
-  return useMemo(() => new Map((q.data ?? []).map((p) => [p.lesson_id, p.state])), [q.data]);
-}
+import { LessonRow, lessonRange, pad, useCourseVideos, useLessonStates } from "@/components/learn/courseParts";
 
 function Header({ outline, done }: { outline: CourseOutline; done: number }) {
   const { t } = useI18n();
@@ -77,11 +31,9 @@ function Header({ outline, done }: { outline: CourseOutline; done: number }) {
 
 function CRoadmap({ outline }: { outline: CourseOutline }) {
   const { t, lang, n } = useI18n();
-  const progress = useProgress();
-  const [open, setOpen] = useState<string>(() => outline.chapters[0]?.id ?? "");
+  const progress = useLessonStates();
   const done = outline.lessons.filter((l) => progress.get(l.id) === "completed").length;
   const resume = outline.lessons.find((l) => progress.get(l.id) !== "completed") ?? outline.lessons[0];
-  const chapter = outline.chapters.find((c) => c.id === open);
   const videos = useCourseVideos(outline.course.id);
   return (
     <>
@@ -94,33 +46,34 @@ function CRoadmap({ outline }: { outline: CourseOutline }) {
             <Button asChild className="mt-6"><Link to={`/learn/${outline.course.slug}/${resume.slug}`}><PlayCircle /> {done ? t("learn.continue") : t("learn.start")} · {n(pad(resume.number))}</Link></Button>
           )}
         </div>
-        {videos.intro && <LessonVideo video={videos.intro} label={t("video.courseIntro")} />}
+        {videos.intro && (
+          <LessonVideo video={videos.intro} poster={{ eyebrow: t("video.courseIntro"), title: pick(outline.course, "title", lang) }} />
+        )}
       </div>
 
-      <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Every card is a real link to its chapter page (URL + Back button work). */}
+      <nav aria-label={t("learn.chapters")} className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {outline.chapters.map((ch) => {
-          const first = ch.lessons[0]?.number ?? 0;
-          const last = ch.lessons[ch.lessons.length - 1]?.number ?? 0;
+          const [first, last] = lessonRange(ch.lessons);
           const chDone = ch.lessons.filter((l) => progress.get(l.id) === "completed").length;
-          const active = open === ch.id;
+          const withVideo = ch.lessons.filter((l) => videos.byLesson.has(l.id)).length;
           return (
-            <button key={ch.id} onClick={() => setOpen(ch.id)} aria-expanded={active}
-              className={cn("rounded border p-6 text-left transition-colors",
-                active ? "border-lime/70 bg-ink-700" : "border-ink-600 bg-ink-800 hover:border-paper/30")}>
+            <Link key={ch.id} to={`/learn/${outline.course.slug}/chapter/${ch.slug}`}
+              aria-label={`${pick(ch, "title", lang)} — ${t("learn.lessonsRange", { from: n(pad(first)), to: n(pad(last)) })}`}
+              className="group relative flex flex-col rounded border border-ink-600 bg-ink-800 p-6 text-left transition-all duration-150
+                hover:-translate-y-0.5 hover:border-lime/60 hover:bg-ink-700 hover:shadow-[0_8px_24px_-16px_rgba(183,243,107,0.5)]
+                active:translate-y-0 active:scale-[0.98] active:border-lime active:bg-ink-600">
               <span className="font-mono text-sm font-medium text-lime">{n(pad(first))}{first !== last && `–${n(pad(last))}`}</span>
-              <span className="mt-3 block font-heading text-lg font-bold text-paper">{pick(ch, "title", lang)}</span>
-              <span className="mt-1 block text-xs text-paper/50">{n(chDone)}/{n(ch.lessons.length)}</span>
-            </button>
+              <span className="mt-3 block pr-6 font-heading text-lg font-bold text-paper">{pick(ch, "title", lang)}</span>
+              <span className="mt-1 flex items-center gap-3 text-xs text-paper/50">
+                <span>{n(chDone)}/{n(ch.lessons.length)}</span>
+                {withVideo > 0 && <span className="inline-flex items-center gap-1"><PlayCircle className="size-3" aria-hidden />{t("learn.videosCount", { n: withVideo })}</span>}
+              </span>
+              <ArrowRight className="absolute right-5 top-6 size-4 text-paper/30 transition-all group-hover:translate-x-0.5 group-hover:text-lime" aria-hidden />
+            </Link>
           );
         })}
-      </div>
-
-      {chapter && (
-        <section className="mt-6 rounded-md border border-ink-600 bg-ink-800 p-2 text-paper sm:p-4" aria-label={pick(chapter, "title", lang)}>
-          <p className="px-3 pb-2 pt-2 text-sm text-paper/60">{pick(chapter, "description", lang)}</p>
-          <ul>{chapter.lessons.map((l) => <LessonRow key={l.id} l={l} courseSlug={outline.course.slug} state={progress.get(l.id)} video={videos.byLesson.get(l.id)} />)}</ul>
-        </section>
-      )}
+      </nav>
       <p className="mt-10 text-[15px] text-paper/80">{t("learn.roadmapFoot")} <Link to="/practice" className="font-semibold text-lime hover:underline">{t("nav.practice")} →</Link></p>
     </>
   );
@@ -130,7 +83,7 @@ const PY_SNIPPET = ["def count_vowels(text):", "    total = 0", "    for ch in t
 
 function PythonCourse({ outline }: { outline: CourseOutline }) {
   const { t, lang, n } = useI18n();
-  const progress = useProgress();
+  const progress = useLessonStates();
   const [open, setOpen] = useState<string | null>(outline.chapters[0]?.id ?? null);
   const videos = useCourseVideos(outline.course.id);
   const done = outline.lessons.filter((l) => progress.get(l.id) === "completed").length;

@@ -414,6 +414,16 @@ export const bn: Record<MessageKey, string> = {
   "notif.markAll": "সব পড়া হয়েছে",
 
   // video
+  "video.play": "ভিডিও চালান",
+  "video.qualityShort": "কোয়ালিটি ⚙-এ",
+  "learn.chapters": "অধ্যায়সমূহ",
+  "learn.lessonsRange": "লেসন {from}–{to}",
+  "learn.videosCount": "{n}টি ভিডিও",
+  "learn.chapterOf": "{total}টির মধ্যে অধ্যায় {n}",
+  "learn.backToCourse": "সব অধ্যায়",
+  "learn.prevChapter": "আগের অধ্যায়",
+  "learn.nextChapter": "পরের অধ্যায়",
+  "learn.lessonVideoEyebrow": "লেসন {n} · ভিডিও",
   "video.label": "লেসন ভিডিও",
   "video.courseIntro": "কোর্স পরিচিতি",
   "video.source": "{channel} · YouTube",

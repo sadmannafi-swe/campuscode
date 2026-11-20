@@ -427,6 +427,16 @@ export const en = {
   "notif.markAll": "Mark all as read",
 
   // video
+  "video.play": "Play video",
+  "video.qualityShort": "Quality in ⚙",
+  "learn.chapters": "Chapters",
+  "learn.lessonsRange": "lessons {from}–{to}",
+  "learn.videosCount": "{n} videos",
+  "learn.chapterOf": "Chapter {n} of {total}",
+  "learn.backToCourse": "All chapters",
+  "learn.prevChapter": "Previous chapter",
+  "learn.nextChapter": "Next chapter",
+  "learn.lessonVideoEyebrow": "Lesson {n} · Video",
   "video.label": "Lesson video",
   "video.courseIntro": "Course introduction",
   "video.source": "{channel} · YouTube",

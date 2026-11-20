@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AlertTriangle, ArrowRight, CheckCircle2, Info, Loader2, PlayCircle, RotateCcw, Subtitles } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, Info, Loader2, Play, RotateCcw, Settings2, Subtitles } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -20,14 +20,16 @@ const SAVE_EVERY_MS = 15_000;
 export interface NextLessonInfo { href: string; title: string; hasVideo: boolean }
 
 /**
- * CampusCode lesson video. Streams from YouTube through the official IFrame Player API; the
- * student stays on the lesson page. Mandatory YouTube branding and controls are left intact.
+ * CampusCode lesson video.
+ * Before playback a CampusCode cover is shown (YouTube is not loaded yet). On click, the official
+ * YouTube IFrame Player loads in the same frame and plays inside the lesson — with YouTube's own
+ * branding and controls left fully intact.
  */
-export function LessonVideo({ video, progress, next, label, autoplay, onProgressSaved }: {
+export function LessonVideo({ video, progress, next, poster, autoplay, onProgressSaved }: {
   video: LearningVideo;
   progress?: VideoProgress | null;
   next?: NextLessonInfo | null;
-  label?: string;
+  poster: { eyebrow: string; title: string };
   autoplay?: boolean;
   onProgressSaved?: () => void;
 }) {
@@ -36,7 +38,8 @@ export function LessonVideo({ video, progress, next, label, autoplay, onProgress
   const nav = useNavigate();
   const mountRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YTPlayer | null>(null);
-  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [activated, setActivated] = useState(Boolean(autoplay));
+  const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [errorKind, setErrorKind] = useState<YTErrorKind | null>(null);
   const [state, setState] = useState<number>(YT_STATE.UNSTARTED);
   const [rates, setRates] = useState<number[]>([]);
@@ -47,7 +50,6 @@ export function LessonVideo({ video, progress, next, label, autoplay, onProgress
   const [countdown, setCountdown] = useState<number | null>(null);
   const [retryKey, setRetryKey] = useState(0);
 
-  // progress bookkeeping (refs: updated every second without re-rendering)
   const duration = video.duration_seconds ?? 0;
   const watchedRef = useRef(progress?.watched_seconds ?? 0);
   const lastTimeRef = useRef<number | null>(null);
@@ -57,6 +59,7 @@ export function LessonVideo({ video, progress, next, label, autoplay, onProgress
   const [completed, setCompleted] = useState(Boolean(progress?.completed_at));
   const resumeAt = progress && progress.position_seconds > 15 && (!duration || progress.position_seconds < duration - 15)
     ? progress.position_seconds : 0;
+  const startAtRef = useRef(resumeAt);
   const captionsWantedRef = useRef<string | null>(null);
 
   const persist = useCallback(async () => {
@@ -67,18 +70,18 @@ export function LessonVideo({ video, progress, next, label, autoplay, onProgress
     try {
       await saveVideoProgress(user.id, video.id, p.getCurrentTime(), watchedRef.current);
       onProgressSaved?.();
-    } catch { /* offline: try again on the next tick */ dirtyRef.current = true; }
+    } catch { dirtyRef.current = true; /* retried on the next tick */ }
   }, [user, video.id, onProgressSaved]);
 
-  // ------------------------------------------------------------- create / destroy the player
+  // ------------------------------------------------------------- create / destroy the official player
   useEffect(() => {
+    if (!activated) return;
     let cancelled = false;
     const host = mountRef.current;
     if (!host) return;
     setStatus("loading");
     setErrorKind(null);
-    // YouTube replaces this element with its iframe; React never manages it.
-    const el = document.createElement("div");
+    const el = document.createElement("div");       // YouTube replaces this node with its iframe
     el.className = "h-full w-full";
     host.replaceChildren(el);
 
@@ -90,18 +93,18 @@ export function LessonVideo({ video, progress, next, label, autoplay, onProgress
         width: "100%",
         height: "100%",
         playerVars: {
-          playsinline: 1, rel: 0, iv_load_policy: 3, controls: 1, fs: 1, enablejsapi: 1,
-          origin: window.location.origin, hl: lang === "bn" ? "bn" : "en", cc_lang_pref: "bn",
-          autoplay: autoplay ? 1 : 0, start: resumeAt,
+          playsinline: 1, rel: 0, iv_load_policy: 3, controls: 1, fs: 1, enablejsapi: 1, autoplay: 1,
+          origin: window.location.origin, hl: lang === "bn" ? "bn" : "en", cc_lang_pref: "bn", start: startAtRef.current,
         },
         events: {
           onReady: (e) => {
             if (cancelled) return;
             const p = e.target;
-            p.getIframe().setAttribute("title", `${t("video.label")}: ${video.title}`);
+            p.getIframe().setAttribute("title", `${poster.eyebrow}: ${poster.title}`);
             setRates((p.getAvailablePlaybackRates() ?? []).filter((r) => SPEEDS.includes(r)));
             setRate(p.getPlaybackRate() || 1);
             setStatus("ready");
+            try { p.playVideo(); } catch { /* browser may require another tap; YouTube shows its play button */ }
           },
           onStateChange: (e) => {
             const s = e.data as unknown as number;
@@ -111,7 +114,6 @@ export function LessonVideo({ video, progress, next, label, autoplay, onProgress
             if (s === YT_STATE.PLAYING) {
               lastTimeRef.current = p.getCurrentTime();
               setCountdown(null);
-              // load the captions module once so its track list becomes available
               try { p.loadModule("captions"); } catch { /* not supported */ }
             }
             if (s === YT_STATE.PAUSED || s === YT_STATE.ENDED) void persist();
@@ -122,7 +124,6 @@ export function LessonVideo({ video, progress, next, label, autoplay, onProgress
             if (!p) return;
             const list = readCaptionTracks(p);
             if (list.length) setTracks(list);
-            // keep captions off unless the student asked for them
             if (captionsWantedRef.current === null) {
               try { p.setOption("captions", "track", {}); } catch { /* ignore */ }
             }
@@ -148,18 +149,16 @@ export function LessonVideo({ video, progress, next, label, autoplay, onProgress
       host.replaceChildren();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [video.youtube_video_id, retryKey]);
+  }, [activated, video.youtube_video_id, retryKey]);
 
-  // ------------------------------------------------------------- watched-time tracking
+  // ------------------------------------------------------------- watched-time tracking (real playback only)
   useEffect(() => {
     if (state !== YT_STATE.PLAYING) return;
     const id = window.setInterval(() => {
       const p = playerRef.current;
       if (!p) return;
       const now = p.getCurrentTime();
-      const prev = lastTimeRef.current ?? now;
-      const delta = now - prev;
-      // count only real forward playback (≤ 2x speed); seeks don't count as watching
+      const delta = now - (lastTimeRef.current ?? now);
       if (delta > 0 && delta <= 2.6) {
         watchedRef.current = Math.min(duration || Infinity, watchedRef.current + delta);
         dirtyRef.current = true;
@@ -180,8 +179,7 @@ export function LessonVideo({ video, progress, next, label, autoplay, onProgress
 
   // ------------------------------------------------------------- end of video
   useEffect(() => {
-    if (state !== YT_STATE.ENDED || !autoNext || !next?.hasVideo) return;
-    setCountdown(5);
+    if (state === YT_STATE.ENDED && autoNext && next?.hasVideo) setCountdown(5);
   }, [state, autoNext, next]);
   useEffect(() => {
     if (countdown === null) return;
@@ -192,8 +190,10 @@ export function LessonVideo({ video, progress, next, label, autoplay, onProgress
 
   // ------------------------------------------------------------- controls
   const changeRate = (r: number) => { playerRef.current?.setPlaybackRate(r); setRate(r); };
-  const preferredTrack = (list: CaptionTrack[]) =>
-    list.find((x) => x.languageCode.toLowerCase().startsWith("bn")) ?? list.find((x) => x.languageCode.startsWith(lang)) ?? list[0];
+  const orderedTracks = (() => {
+    const pref = tracks.find((x) => x.languageCode.toLowerCase().startsWith("bn")) ?? tracks.find((x) => x.languageCode.startsWith(lang));
+    return pref ? [pref, ...tracks.filter((x) => x !== pref)] : tracks;
+  })();
   const setCaptions = (code: string | null) => {
     const p = playerRef.current;
     if (!p) return;
@@ -202,7 +202,7 @@ export function LessonVideo({ video, progress, next, label, autoplay, onProgress
     try { p.setOption("captions", "track", code ? { languageCode: code } : {}); } catch { /* unsupported */ }
   };
   const replay = () => { setCountdown(null); playerRef.current?.seekTo(0, true); playerRef.current?.playVideo(); };
-  const startOver = () => { playerRef.current?.seekTo(0, true); };
+  const start = (fromStart = false) => { startAtRef.current = fromStart ? 0 : resumeAt; setActivated(true); };
 
   const pct = duration ? Math.min(100, Math.round((watched / duration) * 100)) : 0;
   const note = pick(video, "note", lang);
@@ -210,27 +210,48 @@ export function LessonVideo({ video, progress, next, label, autoplay, onProgress
     invalid: t("video.errInvalid"), html5: t("video.errHtml5"), unavailable: t("video.errUnavailable"),
     not_embeddable: t("video.errNotEmbeddable"), api: t("video.errApi"),
   };
+  const showProgress = Boolean(user) && duration > 0 && (watched > 0 || completed);
 
   return (
-    <section aria-label={label ?? t("video.label")} className="overflow-hidden rounded-md border border-ink-600 bg-ink text-paper">
-      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-3 sm:px-5">
-        <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-lime">
-          <PlayCircle className="size-3.5" aria-hidden />{label ?? t("video.label")}
-          {duration > 0 && <span className="font-mono normal-case tracking-normal text-paper/50">· {formatClock(duration)}</span>}
-        </p>
-        <p className="font-mono text-[11px] text-paper/50">{t("video.source", { channel: video.channel_name ?? "YouTube" })}</p>
-      </header>
-
+    <section aria-label={`${poster.eyebrow}: ${poster.title}`}
+      className="overflow-hidden rounded-lg bg-ink text-paper shadow-[0_18px_40px_-28px_rgba(16,24,32,0.65)] ring-1 ring-ink/10">
       {/* 16:9 stage */}
-      <div className="relative aspect-video w-full bg-black">
+      <div className="relative aspect-video w-full overflow-hidden bg-ink">
         <div ref={mountRef} className="absolute inset-0" />
-        {status === "loading" && (
-          <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm text-paper/70" role="status">
-            <Loader2 className="size-5 animate-spin text-lime" aria-hidden />{t("video.loading")}
+
+        {!activated && (
+          // CampusCode cover — YouTube isn't loaded until the student chooses to play.
+          <button type="button" onClick={() => start()} aria-label={`${t("video.play")}: ${poster.title}`}
+            className="group absolute inset-0 flex flex-col justify-between p-5 text-left sm:p-8">
+            <span aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_78%_30%,rgba(183,243,107,0.16),transparent_45%)]" />
+            <span aria-hidden className="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(#F5F4EF_1px,transparent_1px),linear-gradient(90deg,#F5F4EF_1px,transparent_1px)] [background-size:32px_32px]" />
+            <span className="relative font-mono text-[11px] uppercase tracking-[0.14em] text-lime sm:text-xs">{poster.eyebrow}</span>
+            <span className="relative flex items-end justify-between gap-4">
+              <span className="min-w-0">
+                <span className="line-clamp-2 font-heading text-xl font-extrabold leading-tight sm:text-3xl">{poster.title}</span>
+                <span className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs text-paper/60">
+                  {duration > 0 && <span>{formatClock(duration)}</span>}
+                  {resumeAt > 0 && <span className="text-lime">{t("video.resumeFrom", { time: formatClock(resumeAt) })}</span>}
+                  {completed && <span className="inline-flex items-center gap-1 text-lime"><CheckCircle2 className="size-3.5" />{t("video.completed")}</span>}
+                </span>
+              </span>
+              <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-lime text-ink shadow-lift transition-transform duration-150 group-hover:scale-105 group-active:scale-95 sm:size-[72px]">
+                <Play className="ml-1 size-6 fill-current sm:size-7" aria-hidden />
+              </span>
+            </span>
+            {showProgress && (
+              <span aria-hidden className="absolute inset-x-0 bottom-0 h-1 bg-paper/10"><span className="block h-full bg-lime" style={{ width: `${pct}%` }} /></span>
+            )}
+          </button>
+        )}
+
+        {activated && status === "loading" && (
+          <div className="absolute inset-0 flex items-center justify-center" role="status" aria-label={t("video.loading")}>
+            <Loader2 className="size-7 animate-spin text-lime" aria-hidden />
           </div>
         )}
         {status === "error" && errorKind && (
-          <div role="alert" className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-ink-800 px-6 text-center">
+          <div role="alert" className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-ink px-6 text-center">
             <AlertTriangle className="size-7 text-[#E7B865]" aria-hidden />
             <p className="max-w-md text-sm text-paper/85">{errorText[errorKind]}</p>
             {(errorKind === "api" || errorKind === "html5") && (
@@ -244,9 +265,7 @@ export function LessonVideo({ video, progress, next, label, autoplay, onProgress
             <p className="flex items-center gap-2 font-heading text-lg font-bold"><CheckCircle2 className="size-5 text-lime" />{t("video.ended")}</p>
             <div className="flex flex-wrap justify-center gap-2">
               <Button variant="outline-dark" onClick={replay}><RotateCcw /> {t("video.replay")}</Button>
-              {next && (
-                <Button asChild><Link to={next.href}>{t("video.nextLesson")}: {next.title} <ArrowRight /></Link></Button>
-              )}
+              {next && <Button asChild><Link to={next.href}>{t("video.nextLesson")}: {next.title} <ArrowRight /></Link></Button>}
             </div>
             {countdown !== null && (
               <p className="text-sm text-paper/70" aria-live="polite">
@@ -258,63 +277,54 @@ export function LessonVideo({ video, progress, next, label, autoplay, onProgress
         )}
       </div>
 
-      {/* CampusCode control strip: only capabilities the player actually reports, only when it can play */}
-      {status === "ready" && <div className="space-y-3 border-t border-ink-700 px-4 py-3 sm:px-5">
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+      {/* Compact control bar: only capabilities the running player reports. */}
+      {status === "ready" && (
+        <div className="flex items-center gap-4 overflow-x-auto border-t border-ink-700 px-3 py-2 scrollbar-thin sm:px-4">
           {rates.length > 1 && (
-            <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={t("video.speed")}>
-              <span className="mr-1 text-xs font-semibold text-paper/60">{t("video.speed")}</span>
+            <div className="flex shrink-0 items-center gap-1" role="group" aria-label={t("video.speed")}>
+              <span className="mr-1 text-[11px] font-semibold uppercase tracking-wider text-paper/45">{t("video.speed")}</span>
               {rates.map((r) => (
                 <button key={r} onClick={() => changeRate(r)} aria-pressed={rate === r}
-                  className={cn("h-7 min-w-[42px] rounded px-1.5 font-mono text-xs transition-colors",
-                    rate === r ? "bg-lime font-bold text-ink" : "bg-ink-700 text-paper/80 hover:bg-ink-600")}>
-                  {r}x
+                  className={cn("h-7 shrink-0 rounded px-2 font-mono text-xs transition-colors",
+                    rate === r ? "bg-lime font-bold text-ink" : "text-paper/70 hover:bg-ink-700 hover:text-paper")}>
+                  {r}×
                 </button>
               ))}
             </div>
           )}
           {tracks.length > 0 && (
-            <label className="flex items-center gap-2 text-xs font-semibold text-paper/60">
-              <Subtitles className="size-4" aria-hidden />{t("video.captions")}
-              <select value={captionLang ?? ""} onChange={(e) => setCaptions(e.target.value || null)}
-                className="h-7 rounded border border-ink-600 bg-ink-800 px-2 text-xs font-normal text-paper">
+            <label className="flex shrink-0 items-center gap-1.5 text-xs text-paper/70">
+              <Subtitles className="size-4 text-paper/45" aria-hidden /><span className="sr-only">{t("video.captions")}</span>
+              <select value={captionLang ?? ""} onChange={(e) => setCaptions(e.target.value || null)} aria-label={t("video.captions")}
+                className="h-7 rounded border border-ink-600 bg-ink px-2 text-xs text-paper">
                 <option value="">{t("video.captionsOff")}</option>
-                {[preferredTrack(tracks), ...tracks.filter((x) => x !== preferredTrack(tracks))].map((tr) => (
-                  <option key={tr.languageCode + (tr.kind ?? "")} value={tr.languageCode}>{tr.displayName}</option>
-                ))}
+                {orderedTracks.map((tr) => <option key={tr.languageCode + (tr.kind ?? "")} value={tr.languageCode}>{tr.displayName}</option>)}
               </select>
             </label>
           )}
-          {next?.hasVideo && (
-            <label className="flex items-center gap-2 text-xs font-semibold text-paper/60">
-              <Switch label={t("video.autoNext")} checked={autoNext}
-                onCheckedChange={(v) => { setAutoNext(v); storage.set(AUTONEXT_KEY, v ? "1" : "0"); }} />
-              {t("video.autoNext")}
-            </label>
-          )}
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-xs text-paper/55">
-          <span>{t("video.qualityHint")}</span>
-          {user ? (
-            <span className="flex items-center gap-3 font-mono">
-              {resumeAt > 0 && state === YT_STATE.UNSTARTED && (
-                <span>{t("video.resumeFrom", { time: formatClock(resumeAt) })} · <button className="underline underline-offset-2 hover:text-lime" onClick={startOver}>{t("video.startOver")}</button></span>
-              )}
-              {completed ? <span className="inline-flex items-center gap-1 text-lime"><CheckCircle2 className="size-3.5" />{t("video.completed")}</span>
-                : duration > 0 && watched > 0 ? <span>{t("video.watched", { pct })}</span> : null}
+          <span className="ml-auto flex shrink-0 items-center gap-4">
+            {next?.hasVideo && (
+              <label className="flex items-center gap-2 text-xs text-paper/60">
+                <Switch label={t("video.autoNext")} checked={autoNext}
+                  onCheckedChange={(v) => { setAutoNext(v); storage.set(AUTONEXT_KEY, v ? "1" : "0"); }} />
+                <span className="hidden sm:inline">{t("video.autoNext")}</span>
+              </label>
+            )}
+            <span className="flex items-center gap-1 text-[11px] text-paper/40" title={t("video.qualityHint")}>
+              <Settings2 className="size-3.5" aria-hidden />{t("video.qualityShort")}
             </span>
-          ) : <span>{t("video.signInProgress")}</span>}
+          </span>
         </div>
-        {user && duration > 0 && watched > 0 && (
-          <div className="h-1 w-full overflow-hidden rounded-full bg-ink-600" role="progressbar" aria-label={t("video.watched", { pct })} aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-            <div className="h-full rounded-full bg-lime transition-[width] duration-500" style={{ width: `${pct}%` }} />
-          </div>
-        )}
-      </div>}
+      )}
+
+      {showProgress && activated && (
+        <div className="h-0.5 w-full bg-ink-700" role="progressbar" aria-label={t("video.watched", { pct })} aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+          <div className="h-full bg-lime transition-[width] duration-500" style={{ width: `${pct}%` }} />
+        </div>
+      )}
 
       {note && (
-        <div className={cn("flex gap-3 border-t border-ink-700 bg-ink-800 px-4 py-3 text-sm leading-relaxed text-paper/85 sm:px-5", lang === "bn" && "font-bn")}>
+        <div className={cn("flex gap-3 border-t border-ink-700 px-4 py-3 text-sm leading-relaxed text-paper/80", lang === "bn" && "font-bn")}>
           <Info className="mt-0.5 size-4 shrink-0 text-[#E7B865]" aria-hidden />
           <p><span className="font-semibold text-paper">{t("video.authorNote")}: </span>{note}</p>
         </div>

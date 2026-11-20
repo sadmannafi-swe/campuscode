@@ -192,6 +192,7 @@ export default function LessonPage() {
         <div className="mt-8 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
           <div className="lg:hidden">{objectivesCard}</div>
           <LessonVideo key={lessonVideo.id} video={lessonVideo} progress={videoProgress.data}
+            poster={{ eyebrow: t("learn.lessonVideoEyebrow", { n: lesson.number }), title: pick(lesson, "title", lang) }}
             autoplay={searchParams.get("autoplay") === "1"}
             next={next ? { href: `/learn/${courseSlug}/${next.slug}`, title: pick(next, "title", lang), hasVideo: videoSeconds.has(next.id) } : null}
             onProgressSaved={() => qc.invalidateQueries({ queryKey: ["video-progress", user?.id] })} />
