@@ -6,10 +6,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/input";
+import { safeNext } from "@/services/auth";
 import { AuthLayout } from "./AuthLayout";
 import { EMAIL_RE, PasswordInput } from "./PasswordInput";
-
-const safeNext = (n: string | null) => (n && n.startsWith("/") && !n.startsWith("//") ? n : "/");
+import { GoogleButton, OrDivider, readOAuthError } from "./GoogleButton";
 
 export default function LoginPage() {
   const { t } = useI18n();
@@ -19,7 +19,10 @@ export default function LoginPage() {
   const next = safeNext(params.get("next"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<{ email?: string; password?: string; form?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; form?: string }>(() => {
+    const oauth = readOAuthError();
+    return oauth ? { form: oauth } : {};
+  });
   const [busy, setBusy] = useState(false);
 
   if (user) return <Navigate to={next} replace />;
@@ -41,8 +44,10 @@ export default function LoginPage() {
   return (
     <AuthLayout title={t("auth.signInTitle")} subtitle={t("auth.signInSubtitle")}
       footer={<>{t("auth.noAccount")} <Link to={`/register${next !== "/" ? `?next=${encodeURIComponent(next)}` : ""}`} className="font-semibold text-ink underline decoration-lime decoration-2 underline-offset-4">{t("auth.signUp")}</Link></>}>
+      {errors.form && <p role="alert" className="mb-5 rounded border border-error/30 bg-error/5 px-3 py-2.5 text-sm text-error">{errors.form}</p>}
+      <GoogleButton next={next} />
+      <OrDivider />
       <form onSubmit={submit} noValidate className="space-y-5">
-        {errors.form && <p role="alert" className="rounded border border-error/30 bg-error/5 px-3 py-2.5 text-sm text-error">{errors.form}</p>}
         <Field label={t("auth.email")} htmlFor="email" error={errors.email}>
           <Input id="email" type="email" autoComplete="email" inputMode="email" value={email} invalid={Boolean(errors.email)}
             onChange={(e) => setEmail(e.target.value)} />

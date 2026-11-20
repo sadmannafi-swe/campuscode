@@ -118,7 +118,9 @@ The live deployment's public values are committed in `.env.production` (Supabase
    psql "$SUPABASE_DB_URL" -f supabase/seed.sql
    ```
    or paste `supabase/seed.sql` into the SQL editor.
-4. **Auth → URL configuration:** set *Site URL* to your deployed URL and add `<site>/reset-password` to *Redirect URLs* (plus `http://localhost:5173/reset-password` for development). Keep *Confirm email* on.
+4. **Auth → URL configuration:** set *Site URL* to your deployed URL and add `<site>/**` to *Redirect URLs* (plus `http://localhost:5173/**` for development) — Google sign-in returns to `/login`, password reset to `/reset-password`.
+   **Auth → Sign In / Providers → Email:** turn **Confirm email off** — CampusCode signs people in immediately after sign-up (name, email, password, confirm password). If it is left on, the app falls back to a "check your inbox" screen.
+   **Google sign-in:** in Google Cloud Console create an OAuth client (type *Web application*) with authorised redirect URI `https://<ref>.supabase.co/auth/v1/callback`, then paste its Client ID and Secret into *Auth → Sign In / Providers → Google* and enable it. Until then the "Continue with Google" button explains that Google sign-in isn't enabled yet.
 5. **Storage:** the migration creates `avatars` (public read, users write only inside their own `<uid>/` folder, 2 MB, images only) and `course-assets` (public read, admin write).
 
 ### Creating the first administrator
