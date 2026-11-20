@@ -174,6 +174,13 @@ npx supabase functions deploy submit
 - **Admin:** `is_admin()` is evaluated from `auth.uid()`; the UI gate is convenience only. Admins can't demote or suspend themselves.
 - **Secrets** live only in Edge Function secrets; the service-role key is used only by `scripts/grant-admin.mjs` on your machine.
 
+## Lesson videos
+
+- The C course uses the playlist [C Programming Bangla Tutorial](https://youtube.com/playlist?list=PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo) (33 videos, "Bangla Coding Tutor"). All 33 were inspected (title, duration, description, embed permission): video 1 is the course trailer (course intro); videos 2–33 map one-to-one to lessons 1–32. The mapping lives in `supabase/content/videos.mjs` and is stored in `learning_videos` (YouTube IDs only — never embed HTML). Admins can attach, change or remove a lesson's video in *Admin → Lessons → (lesson) → Lesson video*.
+- Videos play inside CampusCode through the official YouTube IFrame Player API (privacy-enhanced `youtube-nocookie.com` host). YouTube's own controls (play/pause, seek, time, volume, fullscreen, ⚙ settings incl. quality) stay intact; CampusCode adds speed chips (only rates the player reports), a caption-language picker (only tracks the player exposes; Bengali preferred), resume, an end-of-video panel and an opt-in "auto-play next lesson".
+- Manual quality selection is not offered by CampusCode because YouTube's `setPlaybackQuality` API has had no effect since 2019; students use the player's ⚙ menu. YouTube's mandatory branding (logo, title, "Watch on YouTube") is left untouched as required by YouTube's terms; those links open youtube.com in a new tab.
+- `video_progress` stores resume position and watched time per student. The database caps watched time at 2× real time between saves and marks a video watched at 90% — clients can't set completion, and watching never completes the lesson itself.
+
 ## Content
 
 - `supabase/content/*.mjs` is the source for courses, lessons (English + Bangla), problems, topics and achievements.

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { AlertTriangle, ArrowLeft, ArrowRight, CheckCircle2, Code2, ListChecks, Target } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Code2, ListChecks, PlayCircle, Target } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,11 @@ import { getCourseOutline, getLesson, getMyLessonProgress, markLessonCompleted, 
 import { listTopics } from "@/services/problems";
 import { friendlyError } from "@/lib/errors";
 import { cn, pick, pickArr } from "@/lib/utils";
-import type { LessonExample, UiLang } from "@/types/db";
+import type { LessonExample, LessonSummary, UiLang } from "@/types/db";
 import { IDE_HANDOFF_KEY } from "@/pages/IdePage";
+import { LessonVideo } from "@/components/learn/LessonVideo";
+import { getVideoProgress, listCourseVideos } from "@/services/videos";
+import { formatClock } from "@/lib/youtube";
 import NotFoundPage from "../NotFoundPage";
 
 function ExampleCard({ ex, contentLang }: { ex: LessonExample; contentLang: UiLang }) {
@@ -49,11 +52,50 @@ function ExampleCard({ ex, contentLang }: { ex: LessonExample; contentLang: UiLa
   );
 }
 
+function ChapterLessons({ lessons, currentId, courseSlug, videoSeconds, completedIds }: {
+  lessons: LessonSummary[]; currentId: string; courseSlug: string;
+  videoSeconds: Map<string, number | null>; completedIds: Set<string>;
+}) {
+  const { t, lang, n } = useI18n();
+  return (
+    <nav aria-label={t("video.inChapter")} className="surface p-4">
+      <p className="eyebrow mb-2">{t("video.inChapter")}</p>
+      <ol className="space-y-0.5">
+        {lessons.map((l) => {
+          const current = l.id === currentId;
+          const hasVideo = videoSeconds.has(l.id);
+          const secs = videoSeconds.get(l.id);
+          return (
+            <li key={l.id}>
+              <Link to={`/learn/${courseSlug}/${l.slug}`} aria-current={current ? "page" : undefined}
+                className={cn("flex items-start gap-2.5 rounded px-2 py-2 text-sm transition-colors",
+                  current ? "bg-ink text-paper" : "hover:bg-paper")}>
+                <span className={cn("mt-0.5 w-6 shrink-0 font-mono text-xs", current ? "text-lime" : "text-slate")}>{n(String(l.number).padStart(2, "0"))}</span>
+                <span className="min-w-0 flex-1">
+                  <span className={cn("block leading-snug", current && "font-semibold")}>{pick(l, "title", lang)}</span>
+                  <span className={cn("mt-0.5 flex items-center gap-1 text-[11px]", current ? "text-paper/60" : "text-slate")}>
+                    {hasVideo
+                      ? <><PlayCircle className="size-3" aria-hidden />{t("video.hasVideo")}{secs ? ` · ${formatClock(secs)}` : ""}</>
+                      : <><BookOpen className="size-3" aria-hidden />{t("video.noVideo")}</>}
+                    {current && <span className="ml-1 rounded bg-lime px-1 font-semibold text-ink">{t("video.now")}</span>}
+                  </span>
+                </span>
+                {completedIds.has(l.id) && <CheckCircle2 className={cn("mt-0.5 size-4 shrink-0", current ? "text-lime" : "text-success")} aria-label={t("learn.completed")} />}
+              </Link>
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+}
+
 export default function LessonPage() {
   const { courseSlug, lessonSlug } = useParams();
   const { t, lang, n } = useI18n();
   const { user } = useAuth();
   const qc = useQueryClient();
+  const [searchParams] = useSearchParams();
   const [contentLang, setContentLang] = useState<UiLang>(lang);
   useEffect(() => setContentLang(lang), [lang]);
 
@@ -65,8 +107,16 @@ export default function LessonPage() {
   });
   const progress = useQuery({ queryKey: ["progress", "lessons", user?.id], enabled: Boolean(user), queryFn: () => getMyLessonProgress(user!.id) });
   const topics = useQuery({ queryKey: ["topics"], queryFn: listTopics, staleTime: 600_000 });
+  const courseId = outline.data?.course.id;
+  const videos = useQuery({ queryKey: ["course-videos", courseId], enabled: Boolean(courseId), queryFn: () => listCourseVideos(courseId!) });
 
   const lesson = lessonQ.data?.lesson;
+  const lessonVideo = videos.data?.find((v) => v.lesson_id === lesson?.id && v.is_published) ?? null;
+  const videoProgress = useQuery({
+    queryKey: ["video-progress", user?.id, lessonVideo?.id],
+    enabled: Boolean(user && lessonVideo),
+    queryFn: async () => (await getVideoProgress(user!.id, [lessonVideo!.id]))[0] ?? null,
+  });
   const completed = progress.data?.some((p) => p.lesson_id === lesson?.id && p.state === "completed");
 
   useEffect(() => {
@@ -83,6 +133,10 @@ export default function LessonPage() {
     },
     onError: (e) => toast.error(friendlyError(e, t)),
   });
+
+  const videoSeconds = useMemo(
+    () => new Map((videos.data ?? []).filter((v) => v.lesson_id).map((v) => [v.lesson_id!, v.duration_seconds])),
+    [videos.data]);
 
   const { prev, next, total } = useMemo(() => {
     const list = outline.data?.lessons ?? [];
@@ -101,6 +155,13 @@ export default function LessonPage() {
   const mistakes = pickArr(lesson, "common_mistakes", contentLang);
   const practice = pickArr(lesson, "practice", contentLang);
   const bnClass = contentLang === "bn" ? "font-bn" : "";
+  const completedIds = new Set((progress.data ?? []).filter((p) => p.state === "completed").map((p) => p.lesson_id));
+  const objectivesCard = objectives.length > 0 && (
+    <section className="rounded bg-white p-4 surface" lang={contentLang}>
+      <h2 className={cn("mb-2 flex items-center gap-2 text-sm font-bold", bnClass)}><Target className="size-4" />{t("learn.objectives")}</h2>
+      <ul className={cn("list-disc space-y-1 pl-5 text-sm", bnClass)}>{objectives.map((o) => <li key={o}>{o}</li>)}</ul>
+    </section>
+  );
   const doneCount = (progress.data ?? []).filter((p) => p.state === "completed" && outline.data!.lessons.some((l) => l.id === p.lesson_id)).length;
 
   return (
@@ -127,10 +188,27 @@ export default function LessonPage() {
       <p className={cn("mt-2 max-w-3xl text-[15px] text-slate", bnClass)} lang={contentLang}>{pick(lesson, "summary", contentLang)}</p>
       {user && <ProgressBar className="mt-5 max-w-sm" value={doneCount} max={total} />}
 
+      {lessonVideo && !videoProgress.isLoading && (
+        <div className="mt-8 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
+          <div className="lg:hidden">{objectivesCard}</div>
+          <LessonVideo key={lessonVideo.id} video={lessonVideo} progress={videoProgress.data}
+            autoplay={searchParams.get("autoplay") === "1"}
+            next={next ? { href: `/learn/${courseSlug}/${next.slug}`, title: pick(next, "title", lang), hasVideo: videoSeconds.has(next.id) } : null}
+            onProgressSaved={() => qc.invalidateQueries({ queryKey: ["video-progress", user?.id] })} />
+          <aside className="space-y-5">
+            <div className="hidden lg:block">{objectivesCard}</div>
+            {chapter && (
+              <ChapterLessons lessons={chapter.lessons} currentId={lesson.id} courseSlug={courseSlug!}
+                videoSeconds={videoSeconds} completedIds={completedIds} />
+            )}
+          </aside>
+        </div>
+      )}
+
       <div className="mt-8 grid items-start gap-5 lg:grid-cols-[1fr_1fr]">
         {/* Explanation card */}
         <article className="surface p-6 sm:p-10" lang={contentLang}>
-          {objectives.length > 0 && (
+          {!lessonVideo && objectives.length > 0 && (
             <section className="mb-6 rounded bg-paper p-4">
               <h2 className={cn("mb-2 flex items-center gap-2 text-sm font-bold", bnClass)}><Target className="size-4" />{t("learn.objectives")}</h2>
               <ul className={cn("list-disc space-y-1 pl-5 text-sm", bnClass)}>{objectives.map((o) => <li key={o}>{o}</li>)}</ul>

@@ -19,6 +19,7 @@ import { problems } from "../supabase/content/problems.mjs";
 import { cChapters, cLessons1 } from "../supabase/content/c-course-1.mjs";
 import { cLessons2 } from "../supabase/content/c-course-2.mjs";
 import { pyChapters, pyLessons } from "../supabase/content/python-course.mjs";
+import { cVideos, PLAYLIST_ID, CHANNEL } from "../supabase/content/videos.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const work = mkdtempSync(path.join(tmpdir(), "cc-seed-"));
@@ -159,6 +160,19 @@ from public.lessons l join public.courses c on c.id = l.course_id where c.slug =
   }
 }
 
+// ---------------------------------------------------------------- lesson videos
+emit(`\n-- Lesson videos (YouTube playlist ${PLAYLIST_ID}); replaces only rows from this playlist`);
+emit(`delete from public.learning_videos where source_playlist_id = ${q(PLAYLIST_ID)};`);
+const cLessonSlugs = new Set([...cLessons1, ...cLessons2].map((l) => l.slug));
+for (const v of cVideos) {
+  if (v.lesson && !cLessonSlugs.has(v.lesson)) throw new Error(`video ${v.videoId}: unknown lesson ${v.lesson}`);
+  if (!/^[A-Za-z0-9_-]{11}$/.test(v.videoId)) throw new Error(`bad video id ${v.videoId}`);
+  emit(`insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, ${v.lesson ? `(select l.id from public.lessons l where l.course_id = c.id and l.slug = ${q(v.lesson)})` : "null"},
+  ${q(v.videoId)}, ${q(PLAYLIST_ID)}, ${v.position}, ${q(v.title)}, ${q(CHANNEL)}, ${v.durationSeconds}, ${q(v.noteEn ?? null)}, ${q(v.noteBn ?? null)}
+from public.courses c where c.slug = 'c-programming';`);
+}
+
 // ---------------------------------------------------------------- problems
 const C_STARTER = `#include <stdio.h>
 
@@ -215,4 +229,4 @@ rmSync(work, { recursive: true, force: true });
 
 const lessonCount = courses.reduce((n, c) => n + c.lessons.length, 0);
 console.log(`seed.sql written: ${courses.length} courses, ${lessonCount} lessons, ${exampleCount} verified examples, ` +
-  `${problems.length} problems, ${testCount} verified tests (C and Python references agree).`);
+  `${problems.length} problems, ${testCount} verified tests (C and Python references agree), ${cVideos.length} lesson videos.`);

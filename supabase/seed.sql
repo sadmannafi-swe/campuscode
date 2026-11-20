@@ -2952,6 +2952,141 @@ Riya         29  F
 Average: 70.75  Topper: Nafi', 'read_students parses the input into tuples, grade maps marks to letters, and report formats aligned columns with f-string widths before printing the average and topper.', 'read_students ইনপুট থেকে Tuple তৈরি করে, grade নম্বরকে Grade-এ রূপান্তর করে, আর report f-string প্রস্থ দিয়ে কলাম সাজিয়ে গড় ও সর্বোচ্চ নম্বরপ্রাপ্তের নাম প্রিন্ট করে।'
 from public.lessons l join public.courses c on c.id = l.course_id where c.slug = 'python-programming' and l.slug = 'python-mini-project';
 
+-- Lesson videos (YouTube playlist PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo); replaces only rows from this playlist
+delete from public.learning_videos where source_playlist_id = 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, null,
+  'O3vzpGGZpIE', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 1, 'সি প্রোগ্রামিং শিখি অ্যামাজন ইঞ্জিনিয়ার এর সাথে- ইউনিভার্সিটির ফুল কোর্স। C Programming Bangla.', 'Bangla Coding Tutor', 107, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'getting-started-printf'),
+  'Kwye58pHhxE', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 2, 'সি প্রোগ্রামিং- ০১:  Play with Printf()- কিভাবে শুরু করব সি প্রোগামিং. C Programming Bangla Tutorial', 'Bangla Coding Tutor', 1325, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'data-types-and-variables'),
+  'yrhf85_bqP0', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 3, 'সি প্রোগ্রামিং- ০২: Data Type & Variables | C Programming Bangla Tutorial | Bangla Coding Tutor', 'Bangla Coding Tutor', 1954, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'integer-and-long-integer'),
+  'WJznertdKXg', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 4, 'সি প্রোগ্রামিং - ০৩ঃ Integer & Long Integer | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 550, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'float-and-double'),
+  'vHCCmlAwEO4', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 5, 'সি প্রোগ্রামিং - ০৪ঃ Float & Double | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 447, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'character-and-ascii'),
+  'A0BBp-sKTeg', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 6, 'সি প্রোগ্রামিং - ০৫ঃ Character & ASCII Code | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 526, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'user-input-scanf'),
+  'bz2fhsxH6dw', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 7, 'সি প্রোগ্রামিং - ০৬ঃ User Input scanf() | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 741, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'if-else'),
+  '131sbMRQVxc', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 8, 'সি প্রোগ্রামিং - ০৭ঃ Condition- If Else | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 1467, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'else-if'),
+  'YiSSRggLTg0', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 9, 'সি প্রোগ্রামিং - ০৮ঃ Condition- if.. else if | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 911, 'The video''s author notes in the description that part of the theory in this video is incorrect: an if block placed inside another if or else block is a *nested* if-else, while if…else if is a flatter way to express most of the same decisions (some people also call it a nested condition). The written explanation below follows the correct terminology.', 'ভিডিওর লেখক ডিসক্রিপশনে জানিয়েছেন, এই ভিডিওর কিছু থিওরিটিক্যাল কথা ভুল ছিল: একটি if বা else ব্লকের ভেতরে আরেকটি if থাকলে সেটাকে Nested if-else বলে, আর if…else if দিয়ে প্রায় একই সিদ্ধান্তগুলো এক লেয়ারে সহজভাবে লেখা যায় (অনেকে একে Nested Condition-ও বলেন)। নিচের লেখা ব্যাখ্যায় সঠিক পরিভাষা ব্যবহার করা হয়েছে।'
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'switch-case'),
+  'v7I6-qm2ZYU', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 10, 'সি প্রোগ্রামিং - ০৯ঃ Switch Case | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 838, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'operators-precedence-associativity'),
+  'AR2HKNPntME', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 11, 'সি প্রোগ্রামিং - ১০ঃ Operator, Precedence, Associativity | Bangla Coding Tutor | C Bangla Tutorial', 'Bangla Coding Tutor', 1024, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'for-loop'),
+  '6-9xhJsp1Vo', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 12, 'সি প্রোগ্রামিং -১১ঃ for Loop | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 1467, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'while-loop'),
+  'hTU2AA-lpSU', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 13, 'সি প্রোগ্রামিং - ১২ঃ while Loop | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 622, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'do-while-loop'),
+  'U6SfSl3Nf-g', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 14, 'সি প্রোগ্রামিং - ১৩ঃ do while Loop | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 393, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'nested-loop'),
+  'AY7GOmY9a8Y', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 15, 'সি প্রোগ্রামিং - ১৪ঃ Nested Loop | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 984, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'break-and-continue'),
+  'UQVM-empou4', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 16, 'সি প্রোগ্রামিং - ১৫ঃ Break and Continue | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 490, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'loop-practice-problems'),
+  'QGkMWkOQro0', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 17, 'সি প্রোগ্রামিং - ১৬ঃ Loop Practice Problems| Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 643, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'array-introduction'),
+  'iGenyxwahTw', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 18, 'সি প্রোগ্রামিং - ১৭ঃ Array Introduction | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 1084, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'array-operations'),
+  'cLl2BRl0oeI', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 19, 'সি প্রোগ্রামিং - ১৮ঃ Array Operations | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 1110, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'two-dimensional-array'),
+  'SxijtYOqQ00', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 20, 'সি প্রোগ্রামিং - ১৯ঃ 2D Array | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 1079, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'function-introduction'),
+  'Uu9I_mCIR58', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 21, 'সি প্রোগ্রামিং - ২০ঃ Function Introduction | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 1187, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'function-exercises'),
+  '-6V1KO3tjKw', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 22, 'সি প্রোগ্রামিং - ২১ঃ Function Exercise in C | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 1030, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'string-in-c'),
+  'ASyLQYGgPks', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 23, 'সি প্রোগ্রামিং - ২২ঃ String in C | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 829, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'string-functions'),
+  'lY5KalJGc48', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 24, 'সি প্রোগ্রামিং - ২৩ঃ String Functions in C | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 532, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'structure-in-c'),
+  '2EiIYRFBBus', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 25, 'সি প্রোগ্রামিং - ২৪ঃ Structure in C | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 654, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'pointer-in-c'),
+  'ZDwB72yiqeE', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 26, 'সি প্রোগ্রামিং -২৫ঃ Pointer in C | Bangla Coding Tutor | C Programming Bangla Tutorial', 'Bangla Coding Tutor', 1407, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'dynamic-memory-allocation'),
+  'M9D677MoXZg', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 27, 'C Programming - 26: Pointers - Dynamic Memory Allocation, malloc(), calloc(), free(), realloc()', 'Bangla Coding Tutor', 1293, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'pointer-array-function'),
+  '91ucuAeAGd8', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 28, 'সি প্রোগ্রামিং -২৭ঃ Pointer- relation with Array and Function | Bangla Coding Tutor', 'Bangla Coding Tutor', 1296, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'file-handling'),
+  'aaqXmefOLKU', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 29, 'সি প্রোগ্রামিং - ২৮: File in C Programming Bangla Tutorial. Read, Write, fscanf, fgets, fputs', 'Bangla Coding Tutor', 2002, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'advanced-file-handling-project'),
+  'JW0ltVKS2po', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 30, 'সি প্রোগ্রামিং - ২৯: File in C Programming (Advanced & Complete) Bangla Tutorial. File Project in C.', 'Bangla Coding Tutor', 1738, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'header-files-and-define'),
+  'FW19KIqRJZc', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 31, 'সি প্রোগ্রামিং - ৩০: C Header Files and #define Bangla Tutorial. Header file in C Programming Bangla', 'Bangla Coding Tutor', 893, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'digital-stopwatch-project'),
+  'ovfyxbijcc0', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 32, 'Digital Stop Watch- C Programming Full Project in Bangla. C Programming Semester Final Class Project', 'Bangla Coding Tutor', 1452, null, null
+from public.courses c where c.slug = 'c-programming';
+insert into public.learning_videos (course_id, lesson_id, youtube_video_id, source_playlist_id, playlist_position, title, channel_name, duration_seconds, note_en, note_bn)
+select c.id, (select l.id from public.lessons l where l.course_id = c.id and l.slug = 'calendar-app-project'),
+  'hafg8uCSb1w', 'PLdl6zXgLsy3zwNjSMiYlOZOr20sykTfgo', 33, 'Calendar App- C Programming Full Project in Bangla. C Programming Semester Final Class Project', 'Bangla Coding Tutor', 1628, null, null
+from public.courses c where c.slug = 'c-programming';
+
 -- Official problems
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
   hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)

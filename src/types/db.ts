@@ -338,3 +338,30 @@ export interface SubmitResult {
     | { number: number; hidden: true }
     | null;
 }
+
+export interface LearningVideo {
+  id: string;
+  course_id: string;
+  lesson_id: string | null;
+  provider: "youtube";
+  youtube_video_id: string;
+  source_playlist_id: string | null;
+  playlist_position: number | null;
+  title: string;
+  channel_name: string | null;
+  duration_seconds: number | null;
+  note_en: string | null;
+  note_bn: string | null;
+  sort_order: number;
+  is_published: boolean;
+}
+
+export interface VideoProgress {
+  user_id: string;
+  video_id: string;
+  position_seconds: number;
+  watched_seconds: number;
+  started_at: string;
+  completed_at: string | null;
+  updated_at: string;
+}

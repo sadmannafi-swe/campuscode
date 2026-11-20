@@ -15,6 +15,7 @@ import { ErrorState, PageLoader, Switch } from "@/components/ui/misc";
 import { friendlyError } from "@/lib/errors";
 import { slugify } from "@/lib/utils";
 import type { Lesson, LessonExample } from "@/types/db";
+import { AdminLessonVideo } from "./AdminLessonVideo";
 
 const lines = (s: string) => s.split("\n").map((x) => x.trim()).filter(Boolean);
 
@@ -121,6 +122,8 @@ export default function AdminLessonEdit() {
           <label className="flex items-center gap-2 text-sm font-medium">Published <Switch label="Published" checked={Boolean(d.is_published)} onCheckedChange={(v) => set({ is_published: v })} /></label>
         </div>
       </section>
+
+      {id && d.course_id && <AdminLessonVideo courseId={d.course_id} lessonId={id} />}
 
       <section className="surface space-y-5 p-5 sm:p-8">
         <Pair label="Title" rows={1} en={d.title_en ?? ""} bn={d.title_bn ?? ""} onEn={(v) => set({ title_en: v })} onBn={(v) => set({ title_bn: v })} />
