@@ -17,6 +17,12 @@ export function friendlyError(err: unknown, t: T): string {
   const e = err as { message?: string; code?: string; status?: number } | null;
   const msg = (e?.message ?? "").toLowerCase();
   const code = e?.code ?? "";
+  // Supabase Auth error codes (https://supabase.com/docs/guides/auth/debugging/error-codes)
+  if (code === "same_password" || msg.includes("should be different from the old password")) return t("auth.samePassword");
+  if (code === "weak_password" || msg.includes("password should")) return t("auth.weakPassword");
+  if (code === "reauthentication_needed" || code === "reauthentication_not_valid") return t("auth.reauthNeeded");
+  if (code === "session_not_found" || code === "session_expired" || code === "refresh_token_not_found") return t("error.auth");
+  if (code === "over_request_rate_limit" || code === "over_email_send_rate_limit") return t("auth.tooMany");
   if (msg.includes("failed to fetch") || msg.includes("network") || msg.includes("load failed")) return t("error.network");
   if (msg.includes("invalid login credentials")) return t("auth.invalidCredentials");
   if (msg.includes("email not confirmed")) return t("auth.emailNotConfirmed");
