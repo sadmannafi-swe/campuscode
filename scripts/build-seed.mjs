@@ -20,6 +20,8 @@ import { cChapters, cLessons1 } from "../supabase/content/c-course-1.mjs";
 import { cLessons2 } from "../supabase/content/c-course-2.mjs";
 import { pyChapters, pyLessons } from "../supabase/content/python-course.mjs";
 import { cVideos, PLAYLIST_ID, CHANNEL } from "../supabase/content/videos.mjs";
+import { cQuizzes } from "../supabase/content/c-quizzes.mjs";
+import { createHash } from "node:crypto";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const work = mkdtempSync(path.join(tmpdir(), "cc-seed-"));
@@ -187,12 +189,14 @@ const PY_STARTER = `# Read the input with input(), solve the problem and print t
 `;
 
 let testCount = 0;
-emit("\n-- Official problems");
 const slugs = new Set();
-for (const p of problems) {
+
+/** Verifies a problem's references on every input and emits it with its tests. */
+function emitProblem(p, { quizItem = false } = {}) {
   if (slugs.has(p.slug)) throw new Error(`Duplicate problem ${p.slug}`);
   slugs.add(p.slug);
-  if (!topics.find((t) => t.slug === p.topic)) throw new Error(`Unknown topic ${p.topic}`);
+  if (!quizItem && !topics.find((t) => t.slug === p.topic)) throw new Error(`Unknown topic ${p.topic}`);
+  if (!(p.samples >= 1 && p.samples < p.inputs.length)) throw new Error(`${p.slug}: needs at least one sample and one hidden test`);
 
   const outputs = p.inputs.map((input, i) => {
     const label = `${p.slug} test ${i + 1}`;
@@ -205,16 +209,19 @@ for (const p of problems) {
     }
     return normalise(py);
   });
+  // Starter code must compile (it is what students start from).
+  if (p.starter_c) runC(p.starter_c, p.inputs[0] + "\n", `${p.slug} starter`);
 
   emit(`insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values (${q(p.slug)}, ${q(p.title)}, ${q(p.title_bn)}, ${q(p.statement)}, ${q(p.statement_bn)}, ${q(p.input_format)}, ${q(p.output_format)},
-  ${q(p.constraints)}, ${q(p.explanation)}, ${arr(p.hints)}, ${q(p.difficulty)}, (select id from public.problem_topics where slug = ${q(p.topic)}),
-  ${q(p.starter_c || C_STARTER)}, ${q(p.starter_py || PY_STARTER)}, true, 'public', 'published', ${bool(p.featured)})
+  ${q(p.constraints)}, ${q(p.explanation)}, ${arr(p.hints)}, ${q(p.difficulty)}, ${quizItem ? "null" : `(select id from public.problem_topics where slug = ${q(p.topic)})`},
+  ${q(p.starter_c || C_STARTER)}, ${q(p.starter_py || PY_STARTER)}, true, 'public', 'published', ${bool(p.featured)}, ${bool(quizItem)})
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;`);
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;`);
   emit(`delete from public.test_cases where problem_id = (select id from public.problems where slug = ${q(p.slug)});`);
   p.inputs.forEach((input, i) => {
     testCount++;
@@ -223,10 +230,71 @@ select id, ${i}, ${q(input)}, ${q(outputs[i])}, ${bool(i < p.samples)} from publ
   });
 }
 
+emit("\n-- Official problems");
+for (const p of problems) emitProblem(p);
+
+// ---------------------------------------------------------------- module quizzes (C course)
+// Option ids are content hashes, so neither their order nor their ids reveal the answer.
+const optionId = (key, i, text) => createHash("sha256").update(`${key}:${i}:${text}`).digest("hex").slice(0, 12);
+emit("\n-- Module quizzes: 6 MCQ + 2 judged programming problems per module");
+const quizKeys = new Set();
+const seenQuestions = new Set();
+let mcqVerified = 0;
+const chapterSlugs = new Set(cChapters.map((c) => c.slug));
+for (const quiz of cQuizzes) {
+  if (!chapterSlugs.has(quiz.chapter)) throw new Error(`quiz for unknown chapter ${quiz.chapter}`);
+  if (quiz.mcq.length !== 6 || quiz.coding.length !== 2) throw new Error(`${quiz.chapter}: a module quiz needs exactly 6 MCQs and 2 programming problems`);
+  const chapterSel = `(select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = ${q(quiz.chapter)})`;
+  emit(`insert into public.module_quizzes (course_id, chapter_id, title_en, title_bn, pass_min_correct, is_published)
+select ch.course_id, ch.id, ${q(quiz.title_en)}, ${q(quiz.title_bn)}, 6, true from public.chapters ch where ch.id = ${chapterSel}
+on conflict (chapter_id) do update set title_en = excluded.title_en, title_bn = excluded.title_bn, pass_min_correct = excluded.pass_min_correct;`);
+  const quizSel = `(select id from public.module_quizzes where chapter_id = ${chapterSel})`;
+  const keys = [];
+  quiz.mcq.forEach((m, i) => {
+    if (quizKeys.has(m.key)) throw new Error(`duplicate question key ${m.key}`);
+    quizKeys.add(m.key); keys.push(m.key);
+    const fingerprint = `${m.prompt}\n${m.code ?? ""}`;
+    if (seenQuestions.has(fingerprint)) throw new Error(`${m.key}: question repeats another question`);
+    seenQuestions.add(fingerprint);
+    if (m.options.length !== 4 || new Set(m.options).size !== 4) throw new Error(`${m.key}: needs 4 distinct options`);
+    if (!(m.answer >= 0 && m.answer < 4)) throw new Error(`${m.key}: answer out of range`);
+    if (m.verify) {
+      const outText = normalise(runC(m.code, m.stdin ?? "", m.key));
+      if (outText !== m.options[m.answer]) throw new Error(`${m.key}: program prints ${JSON.stringify(outText)} but the marked answer is ${JSON.stringify(m.options[m.answer])}`);
+      if (m.options.some((o, j) => j !== m.answer && o === outText)) throw new Error(`${m.key}: another option equals the real output`);
+      mcqVerified++;
+    }
+    const opts = m.options.map((text, j) => ({ id: optionId(m.key, j, text), text }));
+    emit(`insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select ${quizSel}, ${q(m.key)}, 'mcq', ${i + 1}, ${q(m.prompt)}, ${q(m.code ?? null)}, ${q(JSON.stringify(opts))}::jsonb, ${q(m.explanation)}
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;`);
+    emit(`insert into public.quiz_answer_keys (question_id, correct_option)
+select id, ${q(opts[m.answer].id)} from public.quiz_questions where key = ${q(m.key)}
+on conflict (question_id) do update set correct_option = excluded.correct_option;`);
+  });
+  quiz.coding.forEach((p, i) => {
+    emitProblem(p, { quizItem: true });
+    const key = `${quiz.mcq[0].key.replace(/-q\d+$/, "")}-p${i + 1}`;
+    if (quizKeys.has(key)) throw new Error(`duplicate question key ${key}`);
+    quizKeys.add(key); keys.push(key);
+    emit(`insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, problem_id, explanation)
+select ${quizSel}, ${q(key)}, 'code', ${7 + i}, ${q(`Programming problem: ${p.title}`)}, (select id from public.problems where slug = ${q(p.slug)}), ${q(p.explanation)}
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = null, options = null, problem_id = excluded.problem_id, explanation = excluded.explanation;`);
+  });
+  emit(`delete from public.quiz_questions where quiz_id = ${quizSel} and key <> all(${arr(keys)});`);
+}
+
+// Certificates for the C course are earned through its module quizzes (admins can still turn them off).
+emit(`insert into public.course_certificate_settings (course_id, enabled)
+select id, true from public.courses where slug = 'c-programming' on conflict (course_id) do nothing;`);
+
 emit("\ncommit;");
 writeFileSync(path.join(root, "supabase", "seed.sql"), out.join("\n") + "\n");
 rmSync(work, { recursive: true, force: true });
 
 const lessonCount = courses.reduce((n, c) => n + c.lessons.length, 0);
 console.log(`seed.sql written: ${courses.length} courses, ${lessonCount} lessons, ${exampleCount} verified examples, ` +
-  `${problems.length} problems, ${testCount} verified tests (C and Python references agree), ${cVideos.length} lesson videos.`);
+  `${problems.length} problems, ${testCount} verified tests (C and Python references agree), ${cVideos.length} lesson videos, ` +
+  `${cQuizzes.length} module quizzes (${mcqVerified} code-output MCQs verified by gcc).`);

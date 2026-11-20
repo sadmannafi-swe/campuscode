@@ -77,11 +77,13 @@ async function ensurePdf(cert: CertRow): Promise<string> {
     throw new HttpError(503, "pdf_pending", "Your certificate PDF is still being prepared. Please try again in a moment.");
   }
   const path = `${cert.user_id}/${cert.certificate_number}.pdf`;
+  // A certificate counts as issued only once its PDF is stored: the printed date is that moment.
+  const issuedAt = new Date().toISOString();
   try {
     const bytes = await renderCertificatePdf({ pdfLib, fontkit, qrcode }, await loadAssets(), {
       studentName: cert.student_name,
       courseTitle: cert.course_title,
-      issuedAt: cert.issued_at,
+      issuedAt,
       certificateNumber: cert.certificate_number,
       verificationUrl: `${SITE_URL}/verify-certificate/${cert.verification_token}`,
       issuer: cert.issuer_designation,
@@ -90,7 +92,7 @@ async function ensurePdf(cert: CertRow): Promise<string> {
       .upload(path, bytes, { contentType: "application/pdf", upsert: true, cacheControl: "3600" });
     if (upErr) throw upErr;
     const { error: dbErr } = await admin.from("certificates")
-      .update({ pdf_path: path, pdf_generated_at: new Date().toISOString(), pdf_error: null })
+      .update({ pdf_path: path, pdf_generated_at: issuedAt, issued_at: issuedAt, pdf_error: null, pdf_render_started_at: null })
       .eq("id", cert.id).is("pdf_path", null);
     if (dbErr) throw dbErr;
     await admin.from("certificate_events").insert({

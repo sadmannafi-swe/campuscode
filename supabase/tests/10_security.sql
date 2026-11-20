@@ -7,7 +7,8 @@ insert into auth.users (id, email, raw_user_meta_data) values
   ('00000000-0000-0000-0000-00000000000a', 'alice@test.dev', '{"full_name":"Alice","terms_accepted":true}'),
   ('00000000-0000-0000-0000-00000000000b', 'bob@test.dev',   '{"full_name":"Bob"}'),
   ('00000000-0000-0000-0000-0000000000ad', 'admin@test.dev', '{"full_name":"Admin"}');
-select public.bootstrap_admin('admin@test.dev');
+-- The administrator is the single claimed identity (claim flow itself: 60_quizzes_admin.sql).
+insert into public.admin_identity (user_id, email) values ('00000000-0000-0000-0000-0000000000ad', 'admin@test.dev');
 
 insert into public.problem_topics (id, slug, name_en, name_bn)
 values ('10000000-0000-0000-0000-000000000001', 'sec-test', 'Sec', 'সেক')
@@ -192,5 +193,6 @@ reset role;
 -- cleanup fixtures so seed data stays pristine
 delete from public.problems where id in ('20000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-0000000000a1');
 delete from public.problem_topics where id = '10000000-0000-0000-0000-000000000001';
+delete from public.admin_identity;   -- the admin account is protected (on delete restrict) until its slot is released
 delete from auth.users where email like '%@test.dev';
 select 'security tests passed' as result;

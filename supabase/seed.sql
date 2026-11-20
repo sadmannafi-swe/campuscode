@@ -3089,7 +3089,7 @@ from public.courses c where c.slug = 'c-programming';
 
 -- Official problems
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('sum-of-two-numbers', 'Sum of Two Numbers', 'দুটি সংখ্যার যোগফল', 'Read two integers **a** and **b** and print their sum.', 'দুটি পূর্ণসংখ্যা **a** ও **b** ইনপুট নিয়ে তাদের যোগফল প্রিন্ট করো।', 'One line with two integers a and b separated by a space.', 'Print a single integer: a + b.',
   '-10^9 ≤ a, b ≤ 10^9', '12 + 30 = 42. The sum can exceed the range of `int`, so use `long long` in C.', array['Use scanf("%lld %lld", &a, &b) in C.', 'In Python, split the line and convert both parts with int().']::text[], 'easy', (select id from public.problem_topics where slug = 'basics'),
   '#include <stdio.h>
@@ -3101,11 +3101,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'sum-of-two-numbers');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '12 30', '42', true from public.problems where slug = 'sum-of-two-numbers';
@@ -3120,7 +3121,7 @@ select id, 4, '0 0', '0', false from public.problems where slug = 'sum-of-two-nu
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 5, '7 -20', '-13', false from public.problems where slug = 'sum-of-two-numbers';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('celsius-to-fahrenheit', 'Celsius to Fahrenheit', 'সেলসিয়াস থেকে ফারেনহাইট', 'Convert a temperature from Celsius to Fahrenheit using **F = C × 9 / 5 + 32**.', '**F = C × 9 / 5 + 32** সূত্র ব্যবহার করে সেলসিয়াস তাপমাত্রাকে ফারেনহাইটে রূপান্তর করো।', 'A single real number C.', 'Print F rounded to exactly two digits after the decimal point.',
   '-273.15 ≤ C ≤ 10000', '37 × 9 / 5 + 32 = 98.60', array['Use double, not int — 9/5 in integer arithmetic is 1.', 'printf("%.2f\n", f) prints two decimals.']::text[], 'easy', (select id from public.problem_topics where slug = 'basics'),
   '#include <stdio.h>
@@ -3132,11 +3133,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'celsius-to-fahrenheit');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '37', '98.60', true from public.problems where slug = 'celsius-to-fahrenheit';
@@ -3153,7 +3155,7 @@ select id, 5, '-273.15', '-459.67', false from public.problems where slug = 'cel
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 6, '25.5', '77.90', false from public.problems where slug = 'celsius-to-fahrenheit';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('ascii-value', 'ASCII Value of a Character', 'ক্যারেক্টারের ASCII মান', 'Read one printable character and print its ASCII code.', 'একটি প্রিন্টযোগ্য Character ইনপুট নিয়ে তার ASCII কোড প্রিন্ট করো।', 'A single non-space character.', 'Print its ASCII value as an integer.',
   'The character is a printable ASCII character other than space.', 'The ASCII code of ''A'' is 65.', array['A char is stored as a small integer — print it with %d.']::text[], 'easy', (select id from public.problem_topics where slug = 'basics'),
   '#include <stdio.h>
@@ -3165,11 +3167,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'ascii-value');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, 'A', '65', true from public.problems where slug = 'ascii-value';
@@ -3184,7 +3187,7 @@ select id, 4, '#', '35', false from public.problems where slug = 'ascii-value';
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 5, '~', '126', false from public.problems where slug = 'ascii-value';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('even-or-odd', 'Even or Odd', 'জোড় না বিজোড়', 'Given an integer N, print `Even` if it is even, otherwise print `Odd`.', 'একটি পূর্ণসংখ্যা N দেওয়া আছে। N জোড় হলে `Even`, অন্যথায় `Odd` প্রিন্ট করো।', 'A single integer N.', 'Print `Even` or `Odd`.',
   '-10^9 ≤ N ≤ 10^9', '7 % 2 is 1, so 7 is Odd. Careful: in C, -7 % 2 is -1, not 1.', array['Check N % 2 == 0 rather than N % 2 == 1 so negative numbers work.']::text[], 'easy', (select id from public.problem_topics where slug = 'conditions'),
   '#include <stdio.h>
@@ -3196,11 +3199,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'even-or-odd');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '7', 'Odd', true from public.problems where slug = 'even-or-odd';
@@ -3215,7 +3219,7 @@ select id, 4, '-4', 'Even', false from public.problems where slug = 'even-or-odd
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 5, '1000000000', 'Even', false from public.problems where slug = 'even-or-odd';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('largest-of-three', 'Largest of Three', 'তিনটির মধ্যে বৃহত্তম', 'Read three integers and print the largest one.', 'তিনটি পূর্ণসংখ্যা ইনপুট নিয়ে সবচেয়ে বড়টি প্রিন্ট করো।', 'Three integers a, b and c on one line.', 'Print the largest value.',
   '-10^9 ≤ a, b, c ≤ 10^9', 'Among 4, 19 and 7, the largest is 19.', array['Use else-if, or keep a variable `max` and update it twice.']::text[], 'easy', (select id from public.problem_topics where slug = 'conditions'),
   '#include <stdio.h>
@@ -3227,11 +3231,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'largest-of-three');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '4 19 7', '19', true from public.problems where slug = 'largest-of-three';
@@ -3246,7 +3251,7 @@ select id, 4, '0 -5 0', '0', false from public.problems where slug = 'largest-of
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 5, '-1000000000 1000000000 3', '1000000000', false from public.problems where slug = 'largest-of-three';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('leap-year', 'Leap Year', 'অধিবর্ষ (Leap Year)', 'A year is a leap year if it is divisible by 400, or divisible by 4 but not by 100. Print `Leap` or `Not Leap`.', 'কোনো বছর ৪০০ দিয়ে বিভাজ্য হলে, অথবা ৪ দিয়ে বিভাজ্য কিন্তু ১০০ দিয়ে নয় — তাহলে সেটি Leap Year। `Leap` অথবা `Not Leap` প্রিন্ট করো।', 'A single integer Y.', 'Print `Leap` or `Not Leap`.',
   '1 ≤ Y ≤ 10^6', '1900 is divisible by 100 but not by 400, so it is not a leap year. 2000 is.', array['Combine conditions with && and ||, and use parentheses to be explicit.']::text[], 'easy', (select id from public.problem_topics where slug = 'conditions'),
   '#include <stdio.h>
@@ -3258,11 +3263,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'leap-year');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '2024', 'Leap', true from public.problems where slug = 'leap-year';
@@ -3279,7 +3285,7 @@ select id, 5, '400', 'Leap', false from public.problems where slug = 'leap-year'
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 6, '1', 'Not Leap', false from public.problems where slug = 'leap-year';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('grade-calculator', 'Grade Calculator', 'গ্রেড নির্ণয়', 'Given exam marks (0–100), print the letter grade:
 
 | Marks | Grade |
@@ -3303,11 +3309,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'grade-calculator');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '75', 'A', true from public.problems where slug = 'grade-calculator';
@@ -3332,7 +3339,7 @@ select id, 9, '69', 'A-', false from public.problems where slug = 'grade-calcula
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 10, '45', 'C', false from public.problems where slug = 'grade-calculator';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('count-digits', 'Count Digits', 'অঙ্ক গণনা', 'Given a positive integer N, determine how many decimal digits it contains.', 'একটি ধনাত্মক পূর্ণসংখ্যা N দেওয়া আছে। এতে কয়টি অঙ্ক (digit) আছে তা নির্ণয় করো।', 'A single positive integer N.', 'Print the number of digits in N.',
   '1 ≤ N ≤ 10^9', '12045 has the digits 1, 2, 0, 4, 5 — five digits.', array['Divide N by 10 repeatedly until it becomes 0 and count the steps.']::text[], 'easy', (select id from public.problem_topics where slug = 'loops'),
   '#include <stdio.h>
@@ -3344,11 +3351,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'count-digits');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '12045', '5', true from public.problems where slug = 'count-digits';
@@ -3363,7 +3371,7 @@ select id, 4, '999999999', '9', false from public.problems where slug = 'count-d
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 5, '305', '3', false from public.problems where slug = 'count-digits';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('sum-from-1-to-n', 'Sum from 1 to N', '১ থেকে N পর্যন্ত যোগফল', 'Print the sum 1 + 2 + … + N.', '1 + 2 + … + N এর যোগফল প্রিন্ট করো।', 'A single integer N.', 'Print the sum.',
   '1 ≤ N ≤ 10^6', '1 + 2 + 3 + 4 + 5 = 15. For large N the sum exceeds int, so use long long.', array['A for loop from 1 to N works; the formula N×(N+1)/2 works too.']::text[], 'easy', (select id from public.problem_topics where slug = 'loops'),
   '#include <stdio.h>
@@ -3375,11 +3383,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'sum-from-1-to-n');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '5', '15', true from public.problems where slug = 'sum-from-1-to-n';
@@ -3392,7 +3401,7 @@ select id, 3, '1000000', '500000500000', false from public.problems where slug =
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 4, '65536', '2147516416', false from public.problems where slug = 'sum-from-1-to-n';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('factorial', 'Factorial', 'ফ্যাক্টোরিয়াল', 'Print N! = 1 × 2 × … × N. By definition 0! = 1.', 'N! = 1 × 2 × … × N প্রিন্ট করো। সংজ্ঞা অনুযায়ী 0! = 1।', 'A single integer N.', 'Print N!.',
   '0 ≤ N ≤ 20', '5! = 120. 20! fits in a 64-bit long long but not in int.', array['Start the result at 1, not 0.']::text[], 'easy', (select id from public.problem_topics where slug = 'loops'),
   '#include <stdio.h>
@@ -3404,11 +3413,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'factorial');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '5', '120', true from public.problems where slug = 'factorial';
@@ -3423,7 +3433,7 @@ select id, 4, '20', '2432902008176640000', false from public.problems where slug
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 5, '13', '6227020800', false from public.problems where slug = 'factorial';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('multiplication-table', 'Multiplication Table', 'নামতা', 'Print the multiplication table of N from 1 to 10, one line each, in the form `N x i = result`.', 'N এর নামতা 1 থেকে 10 পর্যন্ত প্রিন্ট করো, প্রতি লাইনে `N x i = result` আকারে।', 'A single integer N.', 'Ten lines.',
   '1 ≤ N ≤ 1000', 'For N = 3 the first line is `3 x 1 = 3` and the last is `3 x 10 = 30`.', array['printf("%d x %d = %d\n", n, i, n * i);']::text[], 'easy', (select id from public.problem_topics where slug = 'loops'),
   '#include <stdio.h>
@@ -3435,11 +3445,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'multiplication-table');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '3', '3 x 1 = 3
@@ -3486,7 +3497,7 @@ select id, 3, '1000', '1000 x 1 = 1000
 1000 x 9 = 9000
 1000 x 10 = 10000', false from public.problems where slug = 'multiplication-table';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('reverse-a-number', 'Reverse a Number', 'সংখ্যা উল্টানো', 'Reverse the digits of a non-negative integer N. Leading zeros of the result are dropped.', 'একটি অঋণাত্মক পূর্ণসংখ্যা N এর অঙ্কগুলো উল্টে দাও। ফলাফলের শুরুর শূন্যগুলো বাদ যাবে।', 'A single integer N.', 'Print the reversed number.',
   '0 ≤ N ≤ 10^9', 'Reversing 1200 gives 0021, printed as 21.', array['rev = rev * 10 + n % 10; n = n / 10;']::text[], 'easy', (select id from public.problem_topics where slug = 'loops'),
   '#include <stdio.h>
@@ -3498,11 +3509,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'reverse-a-number');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '12345', '54321', true from public.problems where slug = 'reverse-a-number';
@@ -3517,7 +3529,7 @@ select id, 4, '1000000000', '1', false from public.problems where slug = 'revers
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 5, '908070', '70809', false from public.problems where slug = 'reverse-a-number';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('fibonacci-series', 'Fibonacci Series', 'ফিবোনাচি ধারা', 'Print the first N Fibonacci numbers separated by spaces. The series starts 0 1 1 2 3 …', 'প্রথম N টি Fibonacci সংখ্যা স্পেস দিয়ে আলাদা করে প্রিন্ট করো। ধারাটি শুরু হয় 0 1 1 2 3 … দিয়ে।', 'A single integer N.', 'N numbers on one line separated by single spaces.',
   '1 ≤ N ≤ 90', 'The first 7 numbers are 0 1 1 2 3 5 8.', array['Keep two variables for the previous two terms.', 'The 90th term needs long long.']::text[], 'medium', (select id from public.problem_topics where slug = 'loops'),
   '#include <stdio.h>
@@ -3529,11 +3541,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'fibonacci-series');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '7', '0 1 1 2 3 5 8', true from public.problems where slug = 'fibonacci-series';
@@ -3546,7 +3559,7 @@ select id, 3, '10', '0 1 1 2 3 5 8 13 21 34', false from public.problems where s
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 4, '90', '0 1 1 2 3 5 8 13 21 34 55 89 144 233 377 610 987 1597 2584 4181 6765 10946 17711 28657 46368 75025 121393 196418 317811 514229 832040 1346269 2178309 3524578 5702887 9227465 14930352 24157817 39088169 63245986 102334155 165580141 267914296 433494437 701408733 1134903170 1836311903 2971215073 4807526976 7778742049 12586269025 20365011074 32951280099 53316291173 86267571272 139583862445 225851433717 365435296162 591286729879 956722026041 1548008755920 2504730781961 4052739537881 6557470319842 10610209857723 17167680177565 27777890035288 44945570212853 72723460248141 117669030460994 190392490709135 308061521170129 498454011879264 806515533049393 1304969544928657 2111485077978050 3416454622906707 5527939700884757 8944394323791464 14472334024676221 23416728348467685 37889062373143906 61305790721611591 99194853094755497 160500643816367088 259695496911122585 420196140727489673 679891637638612258 1100087778366101931 1779979416004714189', false from public.problems where slug = 'fibonacci-series';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('star-pyramid', 'Star Pyramid', 'স্টার পিরামিড', 'Print a centred pyramid of `*` with N rows. Row i (1-based) has N − i leading spaces followed by 2i − 1 stars. Do not print trailing spaces.', 'N সারির একটি `*` পিরামিড প্রিন্ট করো। i-তম সারিতে (1 থেকে গণনা) প্রথমে N − i টি স্পেস, তারপর 2i − 1 টি স্টার থাকবে। লাইনের শেষে বাড়তি স্পেস দেবে না।', 'A single integer N.', 'N lines forming the pyramid.',
   '1 ≤ N ≤ 50', 'For N = 3:
 ```
@@ -3563,11 +3576,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'star-pyramid');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '3', '  *
@@ -3591,7 +3605,7 @@ select id, 3, '8', '       *
  *************
 ***************', false from public.problems where slug = 'star-pyramid';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('reverse-array', 'Reverse an Array in Place', 'অ্যারে উল্টানো', 'Read N integers into an array, reverse the array in place (swap from both ends) and print it.', 'N টি পূর্ণসংখ্যা একটি Array-তে নিয়ে, দুই প্রান্ত থেকে swap করে Array-টি উল্টে দাও এবং প্রিন্ট করো।', 'First line: N. Second line: N integers.', 'The reversed array on one line separated by spaces.',
   '1 ≤ N ≤ 1000, |a_i| ≤ 10^9', '1 2 3 4 5 becomes 5 4 3 2 1.', array['Swap a[i] and a[n-1-i] for i from 0 to n/2 - 1.']::text[], 'easy', (select id from public.problem_topics where slug = 'arrays'),
   '#include <stdio.h>
@@ -3603,11 +3617,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'reverse-array');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '5
@@ -3625,7 +3640,7 @@ insert into public.test_cases (problem_id, sort_order, input, expected_output, i
 select id, 4, '4
 1000000000 -1000000000 0 7', '7 0 -1000000000 1000000000', false from public.problems where slug = 'reverse-array';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('max-and-min', 'Maximum and Minimum', 'সর্বোচ্চ ও সর্বনিম্ন', 'Read N integers and print the maximum and the minimum, separated by a space.', 'N টি পূর্ণসংখ্যা ইনপুট নিয়ে সর্বোচ্চ ও সর্বনিম্ন মান স্পেস দিয়ে প্রিন্ট করো।', 'First line: N. Second line: N integers.', 'Two integers: max and min.',
   '1 ≤ N ≤ 10^5, |a_i| ≤ 10^9', 'For 3 9 -2 7 the maximum is 9 and the minimum is -2.', array['Initialise max and min with the first element, not with 0.']::text[], 'easy', (select id from public.problem_topics where slug = 'arrays'),
   '#include <stdio.h>
@@ -3637,11 +3652,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'max-and-min');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '4
@@ -3659,7 +3675,7 @@ insert into public.test_cases (problem_id, sort_order, input, expected_output, i
 select id, 4, '3
 1000000000 -1000000000 1', '1000000000 -1000000000', false from public.problems where slug = 'max-and-min';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('second-largest', 'Second Largest Distinct Value', 'দ্বিতীয় বৃহত্তম মান', 'Print the second largest **distinct** value in the array. If it does not exist, print `None`.', 'Array-এর দ্বিতীয় বৃহত্তম **ভিন্ন** মানটি প্রিন্ট করো। না থাকলে `None` প্রিন্ট করো।', 'First line: N. Second line: N integers.', 'The second largest distinct value, or `None`.',
   '1 ≤ N ≤ 10^5, |a_i| ≤ 10^9', 'In 5 8 8 3 the distinct values are 8, 5, 3 — the second largest is 5.', array['Track `first` and `second` in one pass; skip values equal to `first`.']::text[], 'medium', (select id from public.problem_topics where slug = 'arrays'),
   '#include <stdio.h>
@@ -3671,11 +3687,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'second-largest');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '4
@@ -3696,7 +3713,7 @@ insert into public.test_cases (problem_id, sort_order, input, expected_output, i
 select id, 5, '2
 1000000000 -1000000000', '-1000000000', false from public.problems where slug = 'second-largest';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('matrix-sum', 'Matrix Row and Column Sums', 'ম্যাট্রিক্সের সারি ও কলাম যোগফল', 'Read an R × C matrix. Print the sum of each row on the first line, and the sum of each column on the second line.', 'একটি R × C ম্যাট্রিক্স ইনপুট নাও। প্রথম লাইনে প্রতিটি সারির যোগফল এবং দ্বিতীয় লাইনে প্রতিটি কলামের যোগফল প্রিন্ট করো।', 'First line: R and C. Then R lines with C integers each.', 'Line 1: R row sums. Line 2: C column sums.',
   '1 ≤ R, C ≤ 100, |a_ij| ≤ 10^4', 'For [[1,2],[3,4]] the row sums are 3 7 and the column sums are 4 6.', array['A 2D array int a[100][100] and two nested loops are enough.']::text[], 'medium', (select id from public.problem_topics where slug = 'arrays'),
   '#include <stdio.h>
@@ -3708,11 +3725,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'matrix-sum');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '2 2
@@ -3741,7 +3759,7 @@ select id, 4, '2 4
 -1 -2 -3 -4', '40000 -10
 9999 9998 9997 9996', false from public.problems where slug = 'matrix-sum';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('frequency-count', 'Frequency of Each Value', 'প্রতিটি মানের পুনরাবৃত্তি', 'Given N integers between 0 and 100, print each value that appears, in increasing order, followed by how many times it appears.', '0 থেকে 100 এর মধ্যে N টি পূর্ণসংখ্যা দেওয়া আছে। যে মানগুলো আছে সেগুলো ছোট থেকে বড় ক্রমে প্রিন্ট করো, সাথে কতবার এসেছে তাও।', 'First line: N. Second line: N integers.', 'One line per distinct value: `value count`.',
   '1 ≤ N ≤ 10^5, 0 ≤ a_i ≤ 100', 'For 3 1 3 2 3 the output is `1 1`, `2 1`, `3 3`.', array['Use a counting array int cnt[101] = {0};']::text[], 'medium', (select id from public.problem_topics where slug = 'arrays'),
   '#include <stdio.h>
@@ -3753,11 +3771,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'frequency-count');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '5
@@ -3776,7 +3795,7 @@ insert into public.test_cases (problem_id, sort_order, input, expected_output, i
 select id, 3, '4
 7 7 7 7', '7 4', false from public.problems where slug = 'frequency-count';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('spiral-matrix', 'Spiral Order', 'স্পাইরাল ক্রম', 'Print the elements of an R × C matrix in clockwise spiral order, starting at the top-left corner.', 'একটি R × C ম্যাট্রিক্সের উপাদানগুলো বাম-উপরের কোণ থেকে শুরু করে ঘড়ির কাঁটার দিকে স্পাইরাল ক্রমে প্রিন্ট করো।', 'First line: R and C. Then R lines with C integers.', 'All R×C values on one line separated by spaces.',
   '1 ≤ R, C ≤ 100', 'For
 ```
@@ -3794,11 +3813,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'spiral-matrix');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '3 3
@@ -3830,7 +3850,7 @@ select id, 5, '4 3
 7 8 9
 10 11 12', '1 2 3 6 9 12 11 10 7 4 5 8', false from public.problems where slug = 'spiral-matrix';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('count-vowels', 'Count Vowels', 'স্বরবর্ণ গণনা', 'Given a lowercase string, count its vowels (a, e, i, o, u).', 'ছোট হাতের অক্ষরের একটি String দেওয়া আছে। এতে কয়টি vowel (a, e, i, o, u) আছে গণনা করো।', 'A single lowercase word.', 'Print the number of vowels.',
   '1 ≤ length ≤ 1000', 'campuscode → a, u, o, e → 4 vowels.', array['Loop until the ''\0'' character and compare each char.']::text[], 'easy', (select id from public.problem_topics where slug = 'strings'),
   '#include <stdio.h>
@@ -3842,11 +3862,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'count-vowels');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, 'campuscode', '4', true from public.problems where slug = 'count-vowels';
@@ -3861,7 +3882,7 @@ select id, 4, 'programming', '3', false from public.problems where slug = 'count
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 5, 'bangladesh', '3', false from public.problems where slug = 'count-vowels';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('palindrome-check', 'Palindrome Check', 'প্যালিনড্রোম যাচাই', 'A word is a palindrome if it reads the same backwards. Print `Yes` if the given word is a palindrome, otherwise `No`. The comparison is case-sensitive.', 'কোনো শব্দ উল্টো দিক থেকে পড়লেও একই থাকলে সেটি Palindrome। শব্দটি Palindrome হলে `Yes`, না হলে `No` প্রিন্ট করো। বড়-ছোট হাতের অক্ষর আলাদা ধরা হবে।', 'A single word without spaces.', '`Yes` or `No`.',
   '1 ≤ length ≤ 1000', 'level reversed is level → Yes.', array['Compare s[i] with s[len-1-i] using two indices moving towards the centre.']::text[], 'medium', (select id from public.problem_topics where slug = 'strings'),
   '#include <stdio.h>
@@ -3873,11 +3894,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'palindrome-check');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, 'level', 'Yes', true from public.problems where slug = 'palindrome-check';
@@ -3894,7 +3916,7 @@ select id, 5, 'racecar', 'Yes', false from public.problems where slug = 'palindr
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 6, 'ab', 'No', false from public.problems where slug = 'palindrome-check';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('word-count', 'Word Count', 'শব্দ গণনা', 'Count the words in a line of text. Words are separated by one or more spaces; the line may start or end with spaces.', 'এক লাইনের টেক্সটে কয়টি শব্দ আছে গণনা করো। শব্দগুলো এক বা একাধিক স্পেস দিয়ে আলাদা; লাইনের শুরু বা শেষেও স্পেস থাকতে পারে।', 'One line of text (letters and spaces).', 'The number of words.',
   '1 ≤ length ≤ 1000', '"  learn  practice grow " has 3 words.', array['Read the whole line with fgets.', 'Count positions where a non-space follows a space (or the start).']::text[], 'medium', (select id from public.problem_topics where slug = 'strings'),
   '#include <stdio.h>
@@ -3906,11 +3928,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'word-count');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, 'learn practice grow', '3', true from public.problems where slug = 'word-count';
@@ -3923,7 +3946,7 @@ select id, 3, 'a b c d e f', '6', false from public.problems where slug = 'word-
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 4, '   x', '1', false from public.problems where slug = 'word-count';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('balanced-brackets', 'Balanced Brackets', 'ব্র্যাকেটের ভারসাম্য', 'A string contains only the characters `()[]{}`. Print `Balanced` if every opening bracket is closed by the same type in the correct order, otherwise `Not Balanced`.', 'একটি String-এ শুধু `()[]{}` আছে। প্রতিটি খোলা ব্র্যাকেট সঠিক ক্রমে একই ধরনের ব্র্যাকেট দিয়ে বন্ধ হলে `Balanced`, না হলে `Not Balanced` প্রিন্ট করো।', 'A single string of brackets.', '`Balanced` or `Not Balanced`.',
   '1 ≤ length ≤ 10^4', '`{[()]}` is balanced; `([)]` is not because `[` is closed by `)`.', array['Use a char array as a stack: push opening brackets, pop and compare on closing ones.', 'The stack must be empty at the end.']::text[], 'hard', (select id from public.problem_topics where slug = 'strings'),
   '#include <stdio.h>
@@ -3935,11 +3958,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'balanced-brackets');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '{[()]}', 'Balanced', true from public.problems where slug = 'balanced-brackets';
@@ -3958,7 +3982,7 @@ select id, 6, '{[]}()', 'Balanced', false from public.problems where slug = 'bal
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 7, '][', 'Not Balanced', false from public.problems where slug = 'balanced-brackets';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('prime-range', 'Prime Range', 'সীমার মধ্যে মৌলিক সংখ্যা', 'Write a function `isPrime(n)` and use it to print all prime numbers between A and B (inclusive). If there are none, print `None`.', 'একটি `isPrime(n)` Function লিখে A থেকে B (উভয়সহ) পর্যন্ত সব মৌলিক সংখ্যা প্রিন্ট করো। কোনোটি না থাকলে `None` প্রিন্ট করো।', 'Two integers A and B.', 'The primes on one line separated by spaces, or `None`.',
   '1 ≤ A ≤ B ≤ 10^5', 'Primes between 10 and 30: 11 13 17 19 23 29.', array['1 is not prime.', 'Only test divisors up to √n: for (i = 2; i * i <= n; i++).']::text[], 'medium', (select id from public.problem_topics where slug = 'functions'),
   '#include <stdio.h>
@@ -3970,11 +3994,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'prime-range');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '10 30', '11 13 17 19 23 29', true from public.problems where slug = 'prime-range';
@@ -3989,7 +4014,7 @@ select id, 4, '99980 100000', '99989 99991', false from public.problems where sl
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 5, '2 2', '2', false from public.problems where slug = 'prime-range';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('gcd-and-lcm', 'GCD and LCM', 'গসাগু ও লসাগু', 'Write a function `gcd(a, b)` using the Euclidean algorithm and print the GCD and LCM of two positive integers.', 'ইউক্লিডের পদ্ধতিতে `gcd(a, b)` Function লিখে দুটি ধনাত্মক পূর্ণসংখ্যার গসাগু (GCD) ও লসাগু (LCM) প্রিন্ট করো।', 'Two integers a and b.', 'Two integers: GCD and LCM.',
   '1 ≤ a, b ≤ 10^9', 'gcd(12, 18) = 6 and lcm = 12 × 18 / 6 = 36.', array['gcd(a, b) = gcd(b, a % b), and gcd(a, 0) = a.', 'Compute LCM as a / gcd * b to avoid overflow.']::text[], 'easy', (select id from public.problem_topics where slug = 'functions'),
   '#include <stdio.h>
@@ -4001,11 +4026,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'gcd-and-lcm');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '12 18', '6 36', true from public.problems where slug = 'gcd-and-lcm';
@@ -4020,7 +4046,7 @@ select id, 4, '100 10', '10 100', false from public.problems where slug = 'gcd-a
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 5, '48 180', '12 720', false from public.problems where slug = 'gcd-and-lcm';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('power-function', 'Power Function', 'ঘাত (Power) ফাংশন', 'Write a function `power(base, exp)` that returns base^exp without using `pow()`. Print the result.', '`pow()` ব্যবহার না করে `power(base, exp)` Function লেখো যা base^exp রিটার্ন করে। ফলাফল প্রিন্ট করো।', 'Two integers base and exp.', 'base^exp.',
   '-10 ≤ base ≤ 10, 0 ≤ exp ≤ 18', '2^10 = 1024. Any number to the power 0 is 1.', array['Multiply an accumulator starting at 1, exp times.']::text[], 'easy', (select id from public.problem_topics where slug = 'functions'),
   '#include <stdio.h>
@@ -4032,11 +4058,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'power-function');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '2 10', '1024', true from public.problems where slug = 'power-function';
@@ -4051,7 +4078,7 @@ select id, 4, '-2 17', '-131072', false from public.problems where slug = 'power
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 5, '0 5', '0', false from public.problems where slug = 'power-function';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('swap-with-pointers', 'Swap Using Pointers', 'পয়েন্টার দিয়ে Swap', 'Write `void swap(int *x, int *y)` that exchanges two values through pointers. Read a and b, call swap, and print them.', '`void swap(int *x, int *y)` Function লেখো যা Pointer ব্যবহার করে দুটি মান অদলবদল করে। a ও b ইনপুট নিয়ে swap কল করো এবং প্রিন্ট করো।', 'Two integers a and b.', 'b and a separated by a space (the swapped values).',
   '|a|, |b| ≤ 10^9', 'After swap(&a, &b), a = 9 and b = 4, so print `9 4`.', array['Pass the addresses: swap(&a, &b).', 'Inside swap, use a temporary: int t = *x; *x = *y; *y = t;']::text[], 'easy', (select id from public.problem_topics where slug = 'pointers'),
   '#include <stdio.h>
@@ -4063,11 +4090,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'swap-with-pointers');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '4 9', '9 4', true from public.problems where slug = 'swap-with-pointers';
@@ -4078,7 +4106,7 @@ select id, 2, '-1 1', '1 -1', false from public.problems where slug = 'swap-with
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 3, '1000000000 -1000000000', '-1000000000 1000000000', false from public.problems where slug = 'swap-with-pointers';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('dynamic-array-average', 'Dynamic Array Average', 'Dynamic Array-এর গড়', 'Read N, allocate an array of N integers with `malloc`, read the values, and print their average with two decimals. Free the memory before exiting.', 'N ইনপুট নিয়ে `malloc` দিয়ে N টি পূর্ণসংখ্যার Array বানাও, মানগুলো ইনপুট নাও এবং দুই দশমিক পর্যন্ত গড় প্রিন্ট করো। শেষে `free` করতে ভুলবে না।', 'First line: N. Second line: N integers.', 'The average rounded to two decimals.',
   '1 ≤ N ≤ 10^5, |a_i| ≤ 10^6', '(1 + 2 + 4) / 3 = 2.33', array['int *a = malloc(n * sizeof(int)); — always check for NULL.', 'Cast to double before dividing.']::text[], 'medium', (select id from public.problem_topics where slug = 'pointers'),
   '#include <stdio.h>
@@ -4090,11 +4118,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'dynamic-array-average');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '3
@@ -4112,7 +4141,7 @@ insert into public.test_cases (problem_id, sort_order, input, expected_output, i
 select id, 4, '2
 1 2', '1.50', false from public.problems where slug = 'dynamic-array-average';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('student-records', 'Student Records', 'শিক্ষার্থীর রেকর্ড', 'Define a `struct Student` with a name and marks. Read N students and print the name and marks of the student with the highest marks. If there is a tie, choose the one who appears first.', 'নাম ও নম্বর নিয়ে একটি `struct Student` তৈরি করো। N জন শিক্ষার্থীর তথ্য ইনপুট নিয়ে সর্বোচ্চ নম্বর পাওয়া শিক্ষার্থীর নাম ও নম্বর প্রিন্ট করো। সমান হলে যে আগে এসেছে তাকে নাও।', 'First line: N. Next N lines: a name (no spaces) and an integer mark.', 'The top student''s name and marks separated by a space.',
   '1 ≤ N ≤ 1000, names ≤ 30 characters, 0 ≤ marks ≤ 100', 'Nafi has 91, the highest mark.', array['struct Student { char name[31]; int marks; };', 'Only replace the best when marks are strictly greater.']::text[], 'medium', (select id from public.problem_topics where slug = 'structures'),
   '#include <stdio.h>
@@ -4124,11 +4153,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'student-records');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '3
@@ -4149,7 +4179,7 @@ select id, 3, '2
 Tanvir 100
 Sadia 100', 'Tanvir 100', false from public.problems where slug = 'student-records';
 insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
-  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured)
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
 values ('distance-between-points', 'Distance Between Two Points', 'দুটি বিন্দুর দূরত্ব', 'Define `struct Point { double x, y; }`. Read two points and print the Euclidean distance between them with two decimals.', '`struct Point { double x, y; }` তৈরি করো। দুটি বিন্দু ইনপুট নিয়ে তাদের মধ্যকার দূরত্ব দুই দশমিক পর্যন্ত প্রিন্ট করো।', 'Two lines, each with x and y.', 'The distance rounded to two decimals.',
   '|x|, |y| ≤ 10^4', 'Between (0, 0) and (3, 4) the distance is √(9 + 16) = 5.00.', array['Include <math.h> and use sqrt().']::text[], 'easy', (select id from public.problem_topics where slug = 'structures'),
   '#include <stdio.h>
@@ -4161,11 +4191,12 @@ int main(void) {
 }
 ', '# Read the input with input(), solve the problem and print the answer.
 
-', true, 'public', 'published', false)
+', true, 'public', 'published', false, false)
 on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
   statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
   constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
-  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python;
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
 delete from public.test_cases where problem_id = (select id from public.problems where slug = 'distance-between-points');
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 0, '0 0
@@ -4182,5 +4213,1402 @@ select id, 3, '10000 10000
 insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
 select id, 4, '0.5 1.5
 2.5 -0.5', '2.83', false from public.problems where slug = 'distance-between-points';
+
+-- Module quizzes: 6 MCQ + 2 judged programming problems per module
+insert into public.module_quizzes (course_id, chapter_id, title_en, title_bn, pass_min_correct, is_published)
+select ch.course_id, ch.id, 'Module 1 Quiz: Getting Started', 'মডিউল ১ কুইজ: শুরু করা যাক', 6, true from public.chapters ch where ch.id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'getting-started')
+on conflict (chapter_id) do update set title_en = excluded.title_en, title_bn = excluded.title_bn, pass_min_correct = excluded.pass_min_correct;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'getting-started')), 'c-m1-q1', 'mcq', 1, 'Which function is the starting point of every C program?', null, '[{"id":"8ecded88674f","text":"main()"},{"id":"c91217d4e77e","text":"start()"},{"id":"d8dfcbc72b44","text":"printf()"},{"id":"e9b729c77363","text":"begin()"}]'::jsonb, 'Execution of a C program always begins in main().'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '8ecded88674f' from public.quiz_questions where key = 'c-m1-q1'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'getting-started')), 'c-m1-q2', 'mcq', 2, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    printf("%d", 7 / 2);
+    return 0;
+}', '[{"id":"a9d391916bea","text":"3"},{"id":"af4f78f173a4","text":"3.5"},{"id":"a36a34503caa","text":"4"},{"id":"040560028db6","text":"3.0"}]'::jsonb, 'Both operands are int, so 7 / 2 is integer division and the fraction is discarded.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, 'a9d391916bea' from public.quiz_questions where key = 'c-m1-q2'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'getting-started')), 'c-m1-q3', 'mcq', 3, 'Which of these is a valid variable name in C?', null, '[{"id":"70af6ef6caa5","text":"total_marks"},{"id":"f03dc7058eff","text":"2ndValue"},{"id":"578de2bb509a","text":"float"},{"id":"b74f61e65033","text":"my-score"}]'::jsonb, 'Names may contain letters, digits and _, cannot start with a digit, cannot be keywords (float) and cannot contain ''-''.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '70af6ef6caa5' from public.quiz_questions where key = 'c-m1-q3'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'getting-started')), 'c-m1-q4', 'mcq', 4, 'Which printf() format specifier prints a variable of type long int?', null, '[{"id":"1307b3d588c1","text":"%ld"},{"id":"5b017d571ec3","text":"%f"},{"id":"eb05ff7b6b5a","text":"%c"},{"id":"28ee46767af7","text":"%s"}]'::jsonb, '%ld is used for long int; %d is for int.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '1307b3d588c1' from public.quiz_questions where key = 'c-m1-q4'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'getting-started')), 'c-m1-q5', 'mcq', 5, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    double price = 2.5;
+    printf("%.2f", price);
+    return 0;
+}', '[{"id":"5ffd8ab4d979","text":"2.50"},{"id":"efd827b2c1d1","text":"2.5"},{"id":"cd203a346ef1","text":"2.500000"},{"id":"8985fcc5b2ab","text":"3"}]'::jsonb, '%.2f prints exactly two digits after the decimal point.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '5ffd8ab4d979' from public.quiz_questions where key = 'c-m1-q5'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'getting-started')), 'c-m1-q6', 'mcq', 6, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    char c = ''A'' + 2;
+    printf("%c %d", c, c);
+    return 0;
+}', '[{"id":"eccb57498f6a","text":"C 67"},{"id":"c6b3ce9ff7e4","text":"B 66"},{"id":"ddd559149af8","text":"A 65"},{"id":"32de074ed96a","text":"C 65"}]'::jsonb, '''A'' is 65 in ASCII, so ''A'' + 2 is 67, which is the character ''C''.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, 'eccb57498f6a' from public.quiz_questions where key = 'c-m1-q6'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
+values ('quiz-c-m1-rectangle', 'Rectangle Area and Perimeter', 'আয়তক্ষেত্রের ক্ষেত্রফল ও পরিসীমা', 'The starter code already reads the length **L** and width **W** of a rectangle. Compute and print its area and perimeter exactly in the format shown.', 'Starter code আয়তক্ষেত্রের দৈর্ঘ্য **L** ও প্রস্থ **W** পড়ে নেয়। ক্ষেত্রফল ও পরিসীমা নিচের ফরম্যাটে প্রিন্ট করো।', 'One line with two integers L and W.', 'Two lines: `Area = A` and `Perimeter = P`.',
+  '1 ≤ L, W ≤ 10000', 'For 5 and 3: area 5 × 3 = 15, perimeter 2 × (5 + 3) = 16.', array['Area = L × W, perimeter = 2 × (L + W).', 'The largest area is 10^8, which fits in an int.']::text[], 'easy', null,
+  '#include <stdio.h>
+
+int main(void) {
+    int length, width;
+    scanf("%d %d", &length, &width);
+    /* Print the area and the perimeter here. */
+
+    return 0;
+}', 'length, width = map(int, input().split())
+# Print the area and the perimeter here.
+', true, 'public', 'published', false, true)
+on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
+  statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
+  constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
+delete from public.test_cases where problem_id = (select id from public.problems where slug = 'quiz-c-m1-rectangle');
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 0, '5 3', 'Area = 15
+Perimeter = 16', true from public.problems where slug = 'quiz-c-m1-rectangle';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 1, '1 1', 'Area = 1
+Perimeter = 4', false from public.problems where slug = 'quiz-c-m1-rectangle';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 2, '10000 10000', 'Area = 100000000
+Perimeter = 40000', false from public.problems where slug = 'quiz-c-m1-rectangle';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 3, '7 12', 'Area = 84
+Perimeter = 38', false from public.problems where slug = 'quiz-c-m1-rectangle';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 4, '250 4', 'Area = 1000
+Perimeter = 508', false from public.problems where slug = 'quiz-c-m1-rectangle';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 5, '9999 2', 'Area = 19998
+Perimeter = 20002', false from public.problems where slug = 'quiz-c-m1-rectangle';
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, problem_id, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'getting-started')), 'c-m1-p1', 'code', 7, 'Programming problem: Rectangle Area and Perimeter', (select id from public.problems where slug = 'quiz-c-m1-rectangle'), 'For 5 and 3: area 5 × 3 = 15, perimeter 2 × (5 + 3) = 16.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = null, options = null, problem_id = excluded.problem_id, explanation = excluded.explanation;
+insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
+values ('quiz-c-m1-ascii-neighbour', 'ASCII Code and Next Letter', 'ASCII কোড ও পরের অক্ষর', 'The starter code reads one lowercase letter **c** (from `a` to `y`). Print its ASCII code, a space, and the letter that comes right after it in the alphabet.', 'Starter code একটি ছোট হাতের অক্ষর **c** (`a` থেকে `y`) পড়ে নেয়। এর ASCII কোড, একটি স্পেস, তারপর বর্ণমালায় ঠিক পরের অক্ষরটি প্রিন্ট করো।', 'A single lowercase letter between a and y.', 'The ASCII code, a space, and the next letter.',
+  'c is one of a … y', '''a'' has ASCII code 97 and the next letter is ''b''.', array['A char is a small integer: print it with %d to see its code.', 'c + 1 is the next character.']::text[], 'easy', null,
+  '#include <stdio.h>
+
+int main(void) {
+    char c;
+    scanf(" %c", &c);
+    /* Print the ASCII code of c and the next letter. */
+
+    return 0;
+}', 'c = input().strip()
+# Print the ASCII code of c and the next letter (hint: ord() and chr()).
+', true, 'public', 'published', false, true)
+on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
+  statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
+  constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
+delete from public.test_cases where problem_id = (select id from public.problems where slug = 'quiz-c-m1-ascii-neighbour');
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 0, 'a', '97 b', true from public.problems where slug = 'quiz-c-m1-ascii-neighbour';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 1, 'm', '109 n', false from public.problems where slug = 'quiz-c-m1-ascii-neighbour';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 2, 'y', '121 z', false from public.problems where slug = 'quiz-c-m1-ascii-neighbour';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 3, 'q', '113 r', false from public.problems where slug = 'quiz-c-m1-ascii-neighbour';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 4, 'c', '99 d', false from public.problems where slug = 'quiz-c-m1-ascii-neighbour';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 5, 'x', '120 y', false from public.problems where slug = 'quiz-c-m1-ascii-neighbour';
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, problem_id, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'getting-started')), 'c-m1-p2', 'code', 8, 'Programming problem: ASCII Code and Next Letter', (select id from public.problems where slug = 'quiz-c-m1-ascii-neighbour'), '''a'' has ASCII code 97 and the next letter is ''b''.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = null, options = null, problem_id = excluded.problem_id, explanation = excluded.explanation;
+delete from public.quiz_questions where quiz_id = (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'getting-started')) and key <> all(array['c-m1-q1', 'c-m1-q2', 'c-m1-q3', 'c-m1-q4', 'c-m1-q5', 'c-m1-q6', 'c-m1-p1', 'c-m1-p2']::text[]);
+insert into public.module_quizzes (course_id, chapter_id, title_en, title_bn, pass_min_correct, is_published)
+select ch.course_id, ch.id, 'Module 2 Quiz: Input and Decisions', 'মডিউল ২ কুইজ: ইনপুট ও সিদ্ধান্ত', 6, true from public.chapters ch where ch.id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'input-and-decisions')
+on conflict (chapter_id) do update set title_en = excluded.title_en, title_bn = excluded.title_bn, pass_min_correct = excluded.pass_min_correct;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'input-and-decisions')), 'c-m2-q1', 'mcq', 1, 'Why is the & operator used in `scanf("%d", &n);`?', null, '[{"id":"5a9759193255","text":"It passes the address of n so scanf() can store the value there"},{"id":"81bce8d97c2c","text":"It makes n a constant"},{"id":"229d1d2d48ef","text":"It converts the input into an integer"},{"id":"1e2091e8216f","text":"It prints n after reading it"}]'::jsonb, 'scanf() needs to know where to write the value, so it receives the address of n.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '5a9759193255' from public.quiz_questions where key = 'c-m2-q1'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'input-and-decisions')), 'c-m2-q2', 'mcq', 2, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    int x = 2 + 3 * 4;
+    printf("%d", x);
+    return 0;
+}', '[{"id":"e09776c9ea78","text":"14"},{"id":"0bb761e0ee2f","text":"20"},{"id":"556604aaeb14","text":"24"},{"id":"d1622d89a910","text":"9"}]'::jsonb, '* has higher precedence than +, so 3 * 4 is evaluated first: 2 + 12 = 14.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, 'e09776c9ea78' from public.quiz_questions where key = 'c-m2-q2'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'input-and-decisions')), 'c-m2-q3', 'mcq', 3, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    int x = 20 / 5 * 2;
+    printf("%d", x);
+    return 0;
+}', '[{"id":"52b00cedea2c","text":"8"},{"id":"bc175295f28e","text":"2"},{"id":"2b98c6ce19f0","text":"10"},{"id":"0e0a7840be49","text":"20"}]'::jsonb, '/ and * have the same precedence and associate left to right: (20 / 5) * 2 = 8.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '52b00cedea2c' from public.quiz_questions where key = 'c-m2-q3'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'input-and-decisions')), 'c-m2-q4', 'mcq', 4, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    int marks = 75;
+    if (marks >= 80) printf("A");
+    else if (marks >= 70) printf("B");
+    else if (marks >= 60) printf("C");
+    else printf("F");
+    return 0;
+}', '[{"id":"47327b09540a","text":"B"},{"id":"2a4ca1b0d2d9","text":"A"},{"id":"b7d5be0ff192","text":"BC"},{"id":"4746f05f5bc9","text":"F"}]'::jsonb, 'The first true condition is marks >= 70; the rest of the else-if chain is skipped.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '47327b09540a' from public.quiz_questions where key = 'c-m2-q4'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'input-and-decisions')), 'c-m2-q5', 'mcq', 5, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    int day = 2;
+    switch (day) {
+        case 1: printf("one ");
+        case 2: printf("two ");
+        case 3: printf("three ");
+                break;
+        default: printf("other");
+    }
+    return 0;
+}', '[{"id":"1b5e15cb8392","text":"two three"},{"id":"1283ca599b68","text":"two"},{"id":"763c3a3c3724","text":"two three other"},{"id":"7b861ecc1547","text":"one two three"}]'::jsonb, 'Execution starts at case 2 and falls through to case 3 because case 2 has no break.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '1b5e15cb8392' from public.quiz_questions where key = 'c-m2-q5'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'input-and-decisions')), 'c-m2-q6', 'mcq', 6, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    int a = 10, b = 3;
+    printf("%d", a % b);
+    return 0;
+}', '[{"id":"2064eb08695b","text":"1"},{"id":"4cca3c64f597","text":"3"},{"id":"641383542ded","text":"0"},{"id":"d881ff31f03b","text":"10"}]'::jsonb, '% gives the remainder of integer division: 10 = 3 × 3 + 1.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '2064eb08695b' from public.quiz_questions where key = 'c-m2-q6'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
+values ('quiz-c-m2-ticket-price', 'Ticket Price by Age', 'বয়স অনুযায়ী টিকিটের দাম', 'A museum charges by age:
+
+| Age | Price |
+|---|---|
+| 0–4 | 0 |
+| 5–17 | 50 |
+| 18–59 | 100 |
+| 60 and above | 70 |
+
+Read the visitor''s age and print the ticket price.', 'একটি জাদুঘর বয়স অনুযায়ী টিকিটের দাম নেয়: ০–৪ বছর: ০, ৫–১৭: ৫০, ১৮–৫৯: ১০০, ৬০ বা বেশি: ৭০। বয়স ইনপুট নিয়ে টিকিটের দাম প্রিন্ট করো।', 'A single integer: the age.', 'A single integer: the price.',
+  '0 ≤ age ≤ 120', 'Age 17 is in the 5–17 group, so the price is 50.', array['Use an if / else-if chain and check the ranges in order.']::text[], 'easy', null,
+  '#include <stdio.h>
+
+int main(void) {
+    /* Read the input, solve the problem and print the answer. */
+
+    return 0;
+}
+', '# Read the input with input(), solve the problem and print the answer.
+
+', true, 'public', 'published', false, true)
+on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
+  statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
+  constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
+delete from public.test_cases where problem_id = (select id from public.problems where slug = 'quiz-c-m2-ticket-price');
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 0, '17', '50', true from public.problems where slug = 'quiz-c-m2-ticket-price';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 1, '0', '0', false from public.problems where slug = 'quiz-c-m2-ticket-price';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 2, '4', '0', false from public.problems where slug = 'quiz-c-m2-ticket-price';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 3, '5', '50', false from public.problems where slug = 'quiz-c-m2-ticket-price';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 4, '18', '100', false from public.problems where slug = 'quiz-c-m2-ticket-price';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 5, '59', '100', false from public.problems where slug = 'quiz-c-m2-ticket-price';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 6, '60', '70', false from public.problems where slug = 'quiz-c-m2-ticket-price';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 7, '120', '70', false from public.problems where slug = 'quiz-c-m2-ticket-price';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 8, '35', '100', false from public.problems where slug = 'quiz-c-m2-ticket-price';
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, problem_id, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'input-and-decisions')), 'c-m2-p1', 'code', 7, 'Programming problem: Ticket Price by Age', (select id from public.problems where slug = 'quiz-c-m2-ticket-price'), 'Age 17 is in the 5–17 group, so the price is 50.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = null, options = null, problem_id = excluded.problem_id, explanation = excluded.explanation;
+insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
+values ('quiz-c-m2-calculator', 'Four-Operation Calculator', 'চার অপারেশনের ক্যালকুলেটর', 'Read an expression `a op b` where **op** is one of `+`, `-`, `*`, `/`. Print the result. Division is integer division that truncates toward zero, exactly like C''s `/` on int. If the operation is `/` and b is 0, print `Error`.', '`a op b` আকারে একটি এক্সপ্রেশন পড়ো, যেখানে **op** হলো `+`, `-`, `*` বা `/`। ফলাফল প্রিন্ট করো। ভাগ হবে C-এর int `/` এর মতো integer division। `/` এর ক্ষেত্রে b শূন্য হলে `Error` প্রিন্ট করো।', 'One line: integer a, a space, the operator, a space, integer b.', 'The integer result, or `Error`.',
+  '-10000 ≤ a, b ≤ 10000', '17 / 5 is 3 in integer division.', array['Read the operator with " %c" in scanf().', 'A switch on the operator character keeps the code tidy.']::text[], 'easy', null,
+  '#include <stdio.h>
+
+int main(void) {
+    /* Read the input, solve the problem and print the answer. */
+
+    return 0;
+}
+', '# Read the input with input(), solve the problem and print the answer.
+
+', true, 'public', 'published', false, true)
+on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
+  statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
+  constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
+delete from public.test_cases where problem_id = (select id from public.problems where slug = 'quiz-c-m2-calculator');
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 0, '17 / 5', '3', true from public.problems where slug = 'quiz-c-m2-calculator';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 1, '6 * 7', '42', true from public.problems where slug = 'quiz-c-m2-calculator';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 2, '10 - 25', '-15', false from public.problems where slug = 'quiz-c-m2-calculator';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 3, '-7 / 2', '-3', false from public.problems where slug = 'quiz-c-m2-calculator';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 4, '9 / 0', 'Error', false from public.problems where slug = 'quiz-c-m2-calculator';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 5, '0 + 0', '0', false from public.problems where slug = 'quiz-c-m2-calculator';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 6, '-10000 * 10000', '-100000000', false from public.problems where slug = 'quiz-c-m2-calculator';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 7, '100 / -3', '-33', false from public.problems where slug = 'quiz-c-m2-calculator';
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, problem_id, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'input-and-decisions')), 'c-m2-p2', 'code', 8, 'Programming problem: Four-Operation Calculator', (select id from public.problems where slug = 'quiz-c-m2-calculator'), '17 / 5 is 3 in integer division.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = null, options = null, problem_id = excluded.problem_id, explanation = excluded.explanation;
+delete from public.quiz_questions where quiz_id = (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'input-and-decisions')) and key <> all(array['c-m2-q1', 'c-m2-q2', 'c-m2-q3', 'c-m2-q4', 'c-m2-q5', 'c-m2-q6', 'c-m2-p1', 'c-m2-p2']::text[]);
+insert into public.module_quizzes (course_id, chapter_id, title_en, title_bn, pass_min_correct, is_published)
+select ch.course_id, ch.id, 'Module 3 Quiz: Loops', 'মডিউল ৩ কুইজ: লুপ', 6, true from public.chapters ch where ch.id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'loops')
+on conflict (chapter_id) do update set title_en = excluded.title_en, title_bn = excluded.title_bn, pass_min_correct = excluded.pass_min_correct;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'loops')), 'c-m3-q1', 'mcq', 1, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    for (int i = 0; i < 5; i += 2)
+        printf("%d ", i);
+    return 0;
+}', '[{"id":"ea45a83887d8","text":"0 2 4"},{"id":"388fa5e570a2","text":"0 2 4 6"},{"id":"d033b754fb9d","text":"1 3 5"},{"id":"adf45bb3e2a1","text":"0 1 2 3 4"}]'::jsonb, 'i takes the values 0, 2 and 4; at 6 the condition i < 5 is false.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, 'ea45a83887d8' from public.quiz_questions where key = 'c-m3-q1'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'loops')), 'c-m3-q2', 'mcq', 2, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    int n = 10;
+    do {
+        printf("%d ", n);
+        n++;
+    } while (n < 5);
+    return 0;
+}', '[{"id":"4fcbca8ae18a","text":"10"},{"id":"9f0eba6b6863","text":"Nothing is printed"},{"id":"1bd809c9e603","text":"10 11 12 13 14"},{"id":"5e8f95f62116","text":"5 6 7 8 9"}]'::jsonb, 'A do-while body runs once before the condition is checked; 11 < 5 is false, so it stops.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '4fcbca8ae18a' from public.quiz_questions where key = 'c-m3-q2'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'loops')), 'c-m3-q3', 'mcq', 3, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    int sum = 0, i = 1;
+    while (i <= 4) {
+        sum += i;
+        i++;
+    }
+    printf("%d", sum);
+    return 0;
+}', '[{"id":"777d4d8068a8","text":"10"},{"id":"9684756cee33","text":"6"},{"id":"f9d0a0792e4d","text":"15"},{"id":"44f99cc686c2","text":"4"}]'::jsonb, '1 + 2 + 3 + 4 = 10.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '777d4d8068a8' from public.quiz_questions where key = 'c-m3-q3'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'loops')), 'c-m3-q4', 'mcq', 4, 'How many times is `count++` executed?', '#include <stdio.h>
+
+int main(void) {
+    int count = 0;
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 4; j++)
+            count++;
+    printf("%d", count);
+    return 0;
+}', '[{"id":"f4d6ec7f370d","text":"12"},{"id":"015b7daecc81","text":"7"},{"id":"ebe18c1bdea2","text":"9"},{"id":"0672eb50e72e","text":"16"}]'::jsonb, 'The inner loop runs 4 times for each of the 3 outer iterations: 3 × 4 = 12.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, 'f4d6ec7f370d' from public.quiz_questions where key = 'c-m3-q4'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'loops')), 'c-m3-q5', 'mcq', 5, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    for (int i = 1; i <= 6; i++) {
+        if (i == 3) continue;
+        if (i == 5) break;
+        printf("%d ", i);
+    }
+    return 0;
+}', '[{"id":"769f02e75c0b","text":"1 2 4"},{"id":"a2f44afb941b","text":"1 2"},{"id":"8a428cce5fde","text":"1 2 4 5"},{"id":"855b3bc75f91","text":"1 2 3 4"}]'::jsonb, 'continue skips 3; break stops the loop when i reaches 5.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '769f02e75c0b' from public.quiz_questions where key = 'c-m3-q5'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'loops')), 'c-m3-q6', 'mcq', 6, 'Which loop always executes its body at least once?', null, '[{"id":"56484bb5f4a5","text":"do-while"},{"id":"87cbefe67a84","text":"for"},{"id":"7d73e7778274","text":"while"},{"id":"de7cf1f6bc23","text":"None of them"}]'::jsonb, 'do-while checks its condition after running the body.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '56484bb5f4a5' from public.quiz_questions where key = 'c-m3-q6'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
+values ('quiz-c-m3-multiples', 'Multiples of K', 'K-এর গুণিতক', 'Read N and K. Print every multiple of K between 1 and N (inclusive) in increasing order, separated by single spaces. If there is none, print `None`.', 'N ও K পড়ো। ১ থেকে N পর্যন্ত (N সহ) K-এর সব গুণিতক ছোট থেকে বড় ক্রমে, একটি করে স্পেস দিয়ে প্রিন্ট করো। একটিও না থাকলে `None` প্রিন্ট করো।', 'One line with two integers N and K.', 'The multiples on one line, or `None`.',
+  '1 ≤ N ≤ 1000, 1 ≤ K ≤ 1000', 'Multiples of 3 up to 10 are 3, 6 and 9.', array['Start a loop at K and add K each time.']::text[], 'easy', null,
+  '#include <stdio.h>
+
+int main(void) {
+    /* Read the input, solve the problem and print the answer. */
+
+    return 0;
+}
+', '# Read the input with input(), solve the problem and print the answer.
+
+', true, 'public', 'published', false, true)
+on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
+  statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
+  constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
+delete from public.test_cases where problem_id = (select id from public.problems where slug = 'quiz-c-m3-multiples');
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 0, '10 3', '3 6 9', true from public.problems where slug = 'quiz-c-m3-multiples';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 1, '5 7', 'None', false from public.problems where slug = 'quiz-c-m3-multiples';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 2, '1 1', '1', false from public.problems where slug = 'quiz-c-m3-multiples';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 3, '20 5', '5 10 15 20', false from public.problems where slug = 'quiz-c-m3-multiples';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 4, '1000 250', '250 500 750 1000', false from public.problems where slug = 'quiz-c-m3-multiples';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 5, '17 17', '17', false from public.problems where slug = 'quiz-c-m3-multiples';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 6, '999 1000', 'None', false from public.problems where slug = 'quiz-c-m3-multiples';
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, problem_id, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'loops')), 'c-m3-p1', 'code', 7, 'Programming problem: Multiples of K', (select id from public.problems where slug = 'quiz-c-m3-multiples'), 'Multiples of 3 up to 10 are 3, 6 and 9.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = null, options = null, problem_id = excluded.problem_id, explanation = excluded.explanation;
+insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
+values ('quiz-c-m3-number-triangle', 'Number Triangle', 'সংখ্যার ত্রিভুজ', 'Read N and print a triangle with N rows. Row i (starting from 1) contains the numbers 1 to i separated by single spaces.', 'N পড়ে N সারির একটি ত্রিভুজ প্রিন্ট করো। i-তম সারিতে (১ থেকে শুরু) ১ থেকে i পর্যন্ত সংখ্যা একটি করে স্পেস দিয়ে থাকবে।', 'A single integer N.', 'N lines as described.',
+  '1 ≤ N ≤ 9', 'For N = 3 the rows are `1`, `1 2` and `1 2 3`.', array['Use one loop for the rows and a nested loop for the numbers in each row.']::text[], 'easy', null,
+  '#include <stdio.h>
+
+int main(void) {
+    /* Read the input, solve the problem and print the answer. */
+
+    return 0;
+}
+', '# Read the input with input(), solve the problem and print the answer.
+
+', true, 'public', 'published', false, true)
+on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
+  statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
+  constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
+delete from public.test_cases where problem_id = (select id from public.problems where slug = 'quiz-c-m3-number-triangle');
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 0, '3', '1
+1 2
+1 2 3', true from public.problems where slug = 'quiz-c-m3-number-triangle';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 1, '1', '1', false from public.problems where slug = 'quiz-c-m3-number-triangle';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 2, '9', '1
+1 2
+1 2 3
+1 2 3 4
+1 2 3 4 5
+1 2 3 4 5 6
+1 2 3 4 5 6 7
+1 2 3 4 5 6 7 8
+1 2 3 4 5 6 7 8 9', false from public.problems where slug = 'quiz-c-m3-number-triangle';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 3, '5', '1
+1 2
+1 2 3
+1 2 3 4
+1 2 3 4 5', false from public.problems where slug = 'quiz-c-m3-number-triangle';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 4, '2', '1
+1 2', false from public.problems where slug = 'quiz-c-m3-number-triangle';
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, problem_id, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'loops')), 'c-m3-p2', 'code', 8, 'Programming problem: Number Triangle', (select id from public.problems where slug = 'quiz-c-m3-number-triangle'), 'For N = 3 the rows are `1`, `1 2` and `1 2 3`.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = null, options = null, problem_id = excluded.problem_id, explanation = excluded.explanation;
+delete from public.quiz_questions where quiz_id = (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'loops')) and key <> all(array['c-m3-q1', 'c-m3-q2', 'c-m3-q3', 'c-m3-q4', 'c-m3-q5', 'c-m3-q6', 'c-m3-p1', 'c-m3-p2']::text[]);
+insert into public.module_quizzes (course_id, chapter_id, title_en, title_bn, pass_min_correct, is_published)
+select ch.course_id, ch.id, 'Module 4 Quiz: Arrays', 'মডিউল ৪ কুইজ: অ্যারে', 6, true from public.chapters ch where ch.id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'arrays')
+on conflict (chapter_id) do update set title_en = excluded.title_en, title_bn = excluded.title_bn, pass_min_correct = excluded.pass_min_correct;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'arrays')), 'c-m4-q1', 'mcq', 1, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    int a[5] = {1, 2};
+    printf("%d", a[3]);
+    return 0;
+}', '[{"id":"e4a1735ff17f","text":"0"},{"id":"bd8dc8d7878a","text":"2"},{"id":"f01888baf862","text":"A garbage value"},{"id":"0667b46328db","text":"Compile error"}]'::jsonb, 'When an array is partly initialised, the remaining elements are set to 0.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, 'e4a1735ff17f' from public.quiz_questions where key = 'c-m4-q1'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'arrays')), 'c-m4-q2', 'mcq', 2, 'For `int marks[10];`, what is the index of the last element?', null, '[{"id":"3f8e7f5defe6","text":"9"},{"id":"ed58e6bb1b91","text":"10"},{"id":"16f8d1ac3cd0","text":"1"},{"id":"041dcd0f3819","text":"11"}]'::jsonb, 'Indexes start at 0, so a 10-element array uses indexes 0 to 9.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '3f8e7f5defe6' from public.quiz_questions where key = 'c-m4-q2'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'arrays')), 'c-m4-q3', 'mcq', 3, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    int a[] = {4, 8, 15, 16, 23};
+    int sum = 0;
+    for (int i = 0; i < 5; i++)
+        if (a[i] % 2 == 0)
+            sum += a[i];
+    printf("%d", sum);
+    return 0;
+}', '[{"id":"c2ddd570c2b4","text":"28"},{"id":"700a32c7fd50","text":"66"},{"id":"d91d3a6b67b8","text":"38"},{"id":"2aee7a2db775","text":"24"}]'::jsonb, 'Only the even elements are added: 4 + 8 + 16 = 28.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, 'c2ddd570c2b4' from public.quiz_questions where key = 'c-m4-q3'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'arrays')), 'c-m4-q4', 'mcq', 4, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    int m[2][3] = {{1, 2, 3}, {4, 5, 6}};
+    printf("%d", m[1][2]);
+    return 0;
+}', '[{"id":"4b11e967ea8a","text":"6"},{"id":"a016211a14c8","text":"5"},{"id":"d6b0f2c82f2a","text":"3"},{"id":"b1b0bc05295f","text":"2"}]'::jsonb, 'm[1] is the second row {4, 5, 6}; index 2 in that row is 6.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '4b11e967ea8a' from public.quiz_questions where key = 'c-m4-q4'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'arrays')), 'c-m4-q5', 'mcq', 5, 'In a linear search of an unsorted array with n elements, how many comparisons are needed in the worst case?', null, '[{"id":"37ce77cb5759","text":"n"},{"id":"ec046d3986c9","text":"1"},{"id":"6b663a226233","text":"n / 2"},{"id":"236211b45b21","text":"n × n"}]'::jsonb, 'If the value is last or missing, every element has to be checked once.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '37ce77cb5759' from public.quiz_questions where key = 'c-m4-q5'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'arrays')), 'c-m4-q6', 'mcq', 6, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    int a[8];
+    printf("%zu", sizeof(a) / sizeof(a[0]));
+    return 0;
+}', '[{"id":"9028979177e9","text":"8"},{"id":"a0d1050be075","text":"32"},{"id":"d6ccca2200c4","text":"4"},{"id":"039a45e1f844","text":"7"}]'::jsonb, 'Total bytes of the array divided by the bytes of one element gives the number of elements.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '9028979177e9' from public.quiz_questions where key = 'c-m4-q6'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
+values ('quiz-c-m4-above-average', 'Above the Average', 'গড়ের চেয়ে বেশি', 'Read N integers and print how many of them are **strictly greater** than their average.', 'N টি পূর্ণসংখ্যা পড়ো এবং প্রিন্ট করো তাদের মধ্যে কয়টি গড়ের চেয়ে **কঠোরভাবে বড়**।', 'First line: N. Second line: N integers.', 'A single integer: the count.',
+  '1 ≤ N ≤ 1000, -10^6 ≤ each value ≤ 10^6', 'The average of 2 4 6 8 is 5, and two values (6 and 8) are greater than 5.', array['Store the values in an array, compute the sum first, then traverse again.', 'value > sum / N can be checked without fractions as value * N > sum (use long long).']::text[], 'easy', null,
+  '#include <stdio.h>
+
+int main(void) {
+    /* Read the input, solve the problem and print the answer. */
+
+    return 0;
+}
+', '# Read the input with input(), solve the problem and print the answer.
+
+', true, 'public', 'published', false, true)
+on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
+  statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
+  constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
+delete from public.test_cases where problem_id = (select id from public.problems where slug = 'quiz-c-m4-above-average');
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 0, '4
+2 4 6 8', '2', true from public.problems where slug = 'quiz-c-m4-above-average';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 1, '1
+5', '0', false from public.problems where slug = 'quiz-c-m4-above-average';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 2, '5
+1 1 1 1 1', '0', false from public.problems where slug = 'quiz-c-m4-above-average';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 3, '3
+-3 0 3', '1', false from public.problems where slug = 'quiz-c-m4-above-average';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 4, '6
+10 -10 7 -7 1 2', '4', false from public.problems where slug = 'quiz-c-m4-above-average';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 5, '4
+1000000 -1000000 999999 -999999', '2', false from public.problems where slug = 'quiz-c-m4-above-average';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 6, '5
+1 2 3 4 100', '1', false from public.problems where slug = 'quiz-c-m4-above-average';
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, problem_id, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'arrays')), 'c-m4-p1', 'code', 7, 'Programming problem: Above the Average', (select id from public.problems where slug = 'quiz-c-m4-above-average'), 'The average of 2 4 6 8 is 5, and two values (6 and 8) are greater than 5.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = null, options = null, problem_id = excluded.problem_id, explanation = excluded.explanation;
+insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
+values ('quiz-c-m4-diagonal', 'Main Diagonal Sum', 'প্রধান কর্ণের যোগফল', 'Read an N × N matrix and print the sum of its main diagonal (the elements where row index equals column index).', 'একটি N × N ম্যাট্রিক্স পড়ে এর প্রধান কর্ণের (যেখানে সারি ও কলামের ইনডেক্স সমান) উপাদানগুলোর যোগফল প্রিন্ট করো।', 'First line: N. Then N lines, each with N integers.', 'A single integer: the diagonal sum.',
+  '1 ≤ N ≤ 10, -1000 ≤ each value ≤ 1000', 'For [[1, 2], [3, 4]] the diagonal is 1 and 4, so the sum is 5.', array['Use a two-dimensional array int m[10][10].', 'Add m[i][i] for each i.']::text[], 'easy', null,
+  '#include <stdio.h>
+
+int main(void) {
+    /* Read the input, solve the problem and print the answer. */
+
+    return 0;
+}
+', '# Read the input with input(), solve the problem and print the answer.
+
+', true, 'public', 'published', false, true)
+on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
+  statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
+  constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
+delete from public.test_cases where problem_id = (select id from public.problems where slug = 'quiz-c-m4-diagonal');
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 0, '2
+1 2
+3 4', '5', true from public.problems where slug = 'quiz-c-m4-diagonal';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 1, '1
+-7', '-7', false from public.problems where slug = 'quiz-c-m4-diagonal';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 2, '3
+1 0 0
+0 1 0
+0 0 1', '3', false from public.problems where slug = 'quiz-c-m4-diagonal';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 3, '3
+5 9 9
+9 -5 9
+9 9 5', '5', false from public.problems where slug = 'quiz-c-m4-diagonal';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 4, '4
+1 2 3 4
+5 6 7 8
+9 10 11 12
+13 14 15 16', '34', false from public.problems where slug = 'quiz-c-m4-diagonal';
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, problem_id, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'arrays')), 'c-m4-p2', 'code', 8, 'Programming problem: Main Diagonal Sum', (select id from public.problems where slug = 'quiz-c-m4-diagonal'), 'For [[1, 2], [3, 4]] the diagonal is 1 and 4, so the sum is 5.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = null, options = null, problem_id = excluded.problem_id, explanation = excluded.explanation;
+delete from public.quiz_questions where quiz_id = (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'arrays')) and key <> all(array['c-m4-q1', 'c-m4-q2', 'c-m4-q3', 'c-m4-q4', 'c-m4-q5', 'c-m4-q6', 'c-m4-p1', 'c-m4-p2']::text[]);
+insert into public.module_quizzes (course_id, chapter_id, title_en, title_bn, pass_min_correct, is_published)
+select ch.course_id, ch.id, 'Module 5 Quiz: Functions', 'মডিউল ৫ কুইজ: ফাংশন', 6, true from public.chapters ch where ch.id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'functions')
+on conflict (chapter_id) do update set title_en = excluded.title_en, title_bn = excluded.title_bn, pass_min_correct = excluded.pass_min_correct;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'functions')), 'c-m5-q1', 'mcq', 1, 'What does the return type `void` mean for a function?', null, '[{"id":"e01dbcea5a0d","text":"The function does not return a value"},{"id":"d99ae91ccde8","text":"The function returns 0"},{"id":"1fb3195941f1","text":"The function takes no parameters"},{"id":"7406219966df","text":"The function can return any type"}]'::jsonb, 'void as a return type means no value is returned to the caller.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, 'e01dbcea5a0d' from public.quiz_questions where key = 'c-m5-q1'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'functions')), 'c-m5-q2', 'mcq', 2, 'What does this program print?', '#include <stdio.h>
+
+int square(int x) {
+    return x * x;
+}
+
+int main(void) {
+    printf("%d", square(3) + square(2));
+    return 0;
+}', '[{"id":"00a609cab119","text":"13"},{"id":"5b585b7c15c1","text":"25"},{"id":"8c4762cd1009","text":"10"},{"id":"9ca72840aac1","text":"36"}]'::jsonb, 'square(3) is 9 and square(2) is 4; 9 + 4 = 13.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '00a609cab119' from public.quiz_questions where key = 'c-m5-q2'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'functions')), 'c-m5-q3', 'mcq', 3, 'What does this program print?', '#include <stdio.h>
+
+void change(int x) {
+    x = 100;
+}
+
+int main(void) {
+    int a = 5;
+    change(a);
+    printf("%d", a);
+    return 0;
+}', '[{"id":"7bfd09a80d59","text":"5"},{"id":"ec620a0afcf8","text":"100"},{"id":"d96d49c7d6d6","text":"0"},{"id":"397d96a7e533","text":"105"}]'::jsonb, 'Arguments are passed by value: change() modifies its own copy, not a.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '7bfd09a80d59' from public.quiz_questions where key = 'c-m5-q3'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'functions')), 'c-m5-q4', 'mcq', 4, 'What is a function prototype (declaration) such as `int add(int a, int b);`?', null, '[{"id":"8a99bdbcec0e","text":"It tells the compiler the function''s name, return type and parameter types before it is used"},{"id":"0435deff023e","text":"It is the body of the function"},{"id":"7b3b1e46b847","text":"It calls the function"},{"id":"ee2cf47bef07","text":"It is a comment that the compiler ignores"}]'::jsonb, 'A prototype declares the function so it can be called before its definition appears.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '8a99bdbcec0e' from public.quiz_questions where key = 'c-m5-q4'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'functions')), 'c-m5-q5', 'mcq', 5, 'What does this program print?', '#include <stdio.h>
+
+int add(int a, int b) {
+    return a + b;
+}
+
+int main(void) {
+    printf("%d", add(add(1, 2), add(3, 4)));
+    return 0;
+}', '[{"id":"913976cda669","text":"10"},{"id":"a23b0d62ad50","text":"7"},{"id":"d6c5b7cb45f8","text":"3"},{"id":"20c85302ea44","text":"24"}]'::jsonb, 'The inner calls give 3 and 7, then add(3, 7) is 10.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '913976cda669' from public.quiz_questions where key = 'c-m5-q5'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'functions')), 'c-m5-q6', 'mcq', 6, 'How many values can a C function return directly with one return statement?', null, '[{"id":"584acf838c6e","text":"One"},{"id":"32403724c74d","text":"Two"},{"id":"30b3b3fbd615","text":"As many as it has parameters"},{"id":"6d591ab7bd5b","text":"None"}]'::jsonb, 'return gives back a single value (to return more, use pointers or a struct).'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '584acf838c6e' from public.quiz_questions where key = 'c-m5-q6'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
+values ('quiz-c-m5-perfect-number', 'Perfect Number Check', 'পারফেক্ট সংখ্যা যাচাই', 'A **perfect number** equals the sum of its positive divisors excluding itself (6 = 1 + 2 + 3). Write a function `int isPerfect(int n)` and use it to print `Perfect` or `Not Perfect` for the given N.', '**পারফেক্ট সংখ্যা** তার নিজেকে বাদ দিয়ে সব ধনাত্মক ভাজকের যোগফলের সমান (৬ = ১ + ২ + ৩)। `int isPerfect(int n)` ফাংশন লিখে প্রদত্ত N-এর জন্য `Perfect` বা `Not Perfect` প্রিন্ট করো।', 'A single integer N.', '`Perfect` or `Not Perfect`.',
+  '1 ≤ N ≤ 100000', '28 = 1 + 2 + 4 + 7 + 14, so 28 is perfect.', array['Loop i from 1 to n − 1 and add i whenever n % i == 0.', '1 is not perfect: it has no divisors other than itself.']::text[], 'easy', null,
+  '#include <stdio.h>
+
+int main(void) {
+    /* Read the input, solve the problem and print the answer. */
+
+    return 0;
+}
+', '# Read the input with input(), solve the problem and print the answer.
+
+', true, 'public', 'published', false, true)
+on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
+  statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
+  constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
+delete from public.test_cases where problem_id = (select id from public.problems where slug = 'quiz-c-m5-perfect-number');
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 0, '28', 'Perfect', true from public.problems where slug = 'quiz-c-m5-perfect-number';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 1, '6', 'Perfect', false from public.problems where slug = 'quiz-c-m5-perfect-number';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 2, '1', 'Not Perfect', false from public.problems where slug = 'quiz-c-m5-perfect-number';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 3, '12', 'Not Perfect', false from public.problems where slug = 'quiz-c-m5-perfect-number';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 4, '496', 'Perfect', false from public.problems where slug = 'quiz-c-m5-perfect-number';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 5, '8128', 'Perfect', false from public.problems where slug = 'quiz-c-m5-perfect-number';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 6, '100000', 'Not Perfect', false from public.problems where slug = 'quiz-c-m5-perfect-number';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 7, '2', 'Not Perfect', false from public.problems where slug = 'quiz-c-m5-perfect-number';
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, problem_id, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'functions')), 'c-m5-p1', 'code', 7, 'Programming problem: Perfect Number Check', (select id from public.problems where slug = 'quiz-c-m5-perfect-number'), '28 = 1 + 2 + 4 + 7 + 14, so 28 is perfect.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = null, options = null, problem_id = excluded.problem_id, explanation = excluded.explanation;
+insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
+values ('quiz-c-m5-digit-sum', 'Sum of Digits Function', 'অঙ্কের যোগফলের ফাংশন', 'Write a function `int digitSum(int n)` that returns the sum of the decimal digits of a non-negative integer, then read N and print `digitSum(N)`.', 'একটি ফাংশন `int digitSum(int n)` লেখো যা একটি অঋণাত্মক পূর্ণসংখ্যার অঙ্কগুলোর যোগফল রিটার্ন করে, তারপর N পড়ে `digitSum(N)` প্রিন্ট করো।', 'A single integer N.', 'The sum of the digits of N.',
+  '0 ≤ N ≤ 2 000 000 000', '1 + 2 + 3 + 4 = 10.', array['n % 10 is the last digit and n / 10 removes it.', 'Repeat while n > 0.']::text[], 'easy', null,
+  '#include <stdio.h>
+
+int main(void) {
+    /* Read the input, solve the problem and print the answer. */
+
+    return 0;
+}
+', '# Read the input with input(), solve the problem and print the answer.
+
+', true, 'public', 'published', false, true)
+on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
+  statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
+  constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
+delete from public.test_cases where problem_id = (select id from public.problems where slug = 'quiz-c-m5-digit-sum');
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 0, '1234', '10', true from public.problems where slug = 'quiz-c-m5-digit-sum';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 1, '0', '0', false from public.problems where slug = 'quiz-c-m5-digit-sum';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 2, '9', '9', false from public.problems where slug = 'quiz-c-m5-digit-sum';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 3, '2000000000', '2', false from public.problems where slug = 'quiz-c-m5-digit-sum';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 4, '1999999999', '82', false from public.problems where slug = 'quiz-c-m5-digit-sum';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 5, '505', '10', false from public.problems where slug = 'quiz-c-m5-digit-sum';
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, problem_id, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'functions')), 'c-m5-p2', 'code', 8, 'Programming problem: Sum of Digits Function', (select id from public.problems where slug = 'quiz-c-m5-digit-sum'), '1 + 2 + 3 + 4 = 10.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = null, options = null, problem_id = excluded.problem_id, explanation = excluded.explanation;
+delete from public.quiz_questions where quiz_id = (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'functions')) and key <> all(array['c-m5-q1', 'c-m5-q2', 'c-m5-q3', 'c-m5-q4', 'c-m5-q5', 'c-m5-q6', 'c-m5-p1', 'c-m5-p2']::text[]);
+insert into public.module_quizzes (course_id, chapter_id, title_en, title_bn, pass_min_correct, is_published)
+select ch.course_id, ch.id, 'Module 6 Quiz: Strings', 'মডিউল ৬ কুইজ: স্ট্রিং', 6, true from public.chapters ch where ch.id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'strings')
+on conflict (chapter_id) do update set title_en = excluded.title_en, title_bn = excluded.title_bn, pass_min_correct = excluded.pass_min_correct;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'strings')), 'c-m6-q1', 'mcq', 1, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    char s[] = "code";
+    printf("%zu", sizeof(s));
+    return 0;
+}', '[{"id":"564d750d0be9","text":"5"},{"id":"5eafa23df325","text":"4"},{"id":"7f99d2db3459","text":"8"},{"id":"51adaa6808fb","text":"1"}]'::jsonb, 'The array holds the 4 letters plus the terminating ''\0''.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '564d750d0be9' from public.quiz_questions where key = 'c-m6-q1'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'strings')), 'c-m6-q2', 'mcq', 2, 'Which character marks the end of a string in C?', null, '[{"id":"583071068a0e","text":"''\\0'' (the null character)"},{"id":"dd1c8290f5b1","text":"''\\n'' (newline)"},{"id":"d318cb266f9f","text":"'' '' (space)"},{"id":"cb65dfbc2908","text":"''.'' (full stop)"}]'::jsonb, 'Every C string ends with the null character ''\0''.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '583071068a0e' from public.quiz_questions where key = 'c-m6-q2'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'strings')), 'c-m6-q3', 'mcq', 3, 'What does this program print?', '#include <stdio.h>
+#include <string.h>
+
+int main(void) {
+    printf("%zu", strlen("hello world"));
+    return 0;
+}', '[{"id":"0dc38414bdcb","text":"11"},{"id":"d263821b8464","text":"10"},{"id":"f7deb396b34e","text":"12"},{"id":"73fb72d5c8d0","text":"5"}]'::jsonb, 'strlen() counts every character, including the space, but not the ''\0''.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '0dc38414bdcb' from public.quiz_questions where key = 'c-m6-q3'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'strings')), 'c-m6-q4', 'mcq', 4, 'What does this program print?', '#include <stdio.h>
+#include <string.h>
+
+int main(void) {
+    char a[20] = "Campus";
+    strcat(a, "Code");
+    printf("%s %zu", a, strlen(a));
+    return 0;
+}', '[{"id":"95610e616a06","text":"CampusCode 10"},{"id":"bdeba622570b","text":"Campus Code 11"},{"id":"957a96d2c029","text":"CampusCode 6"},{"id":"be7fd4131714","text":"Code 4"}]'::jsonb, 'strcat() appends "Code" to the end of a, giving the 10-character string CampusCode.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '95610e616a06' from public.quiz_questions where key = 'c-m6-q4'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'strings')), 'c-m6-q5', 'mcq', 5, 'What does `strcmp("apple", "banana")` return?', null, '[{"id":"804af836eab7","text":"A negative value"},{"id":"77d06021288e","text":"0"},{"id":"0ff803f1db3b","text":"A positive value"},{"id":"ffdd9c5b0f03","text":"The length of the shorter string"}]'::jsonb, '"apple" comes before "banana", so strcmp() returns a value less than 0.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '804af836eab7' from public.quiz_questions where key = 'c-m6-q5'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'strings')), 'c-m6-q6', 'mcq', 6, 'The user types `Rahim Khan` and presses Enter. What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    char name[50];
+    scanf("%s", name);
+    printf("%s", name);
+    return 0;
+}', '[{"id":"f4d665fdf96e","text":"Rahim"},{"id":"3b99cc88e810","text":"Rahim Khan"},{"id":"c1880a904039","text":"Khan"},{"id":"e235cf810429","text":"Nothing is printed"}]'::jsonb, 'scanf("%s") stops reading at the first whitespace.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, 'f4d665fdf96e' from public.quiz_questions where key = 'c-m6-q6'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
+values ('quiz-c-m6-count-uppercase', 'Count Capital Letters', 'বড় হাতের অক্ষর গণনা', 'Read one line of text (it may contain spaces) and print how many uppercase English letters (A–Z) it contains.', 'এক লাইন টেক্সট পড়ো (এতে স্পেস থাকতে পারে) এবং এতে কয়টি বড় হাতের ইংরেজি অক্ষর (A–Z) আছে তা প্রিন্ট করো।', 'One line of printable ASCII text.', 'A single integer: the count.',
+  '1 ≤ length ≤ 200', '"Hello World" contains H and W.', array['scanf("%[^\n]", s) reads a whole line including spaces.', 'A character c is uppercase when c >= ''A'' && c <= ''Z''.']::text[], 'easy', null,
+  '#include <stdio.h>
+
+int main(void) {
+    /* Read the input, solve the problem and print the answer. */
+
+    return 0;
+}
+', '# Read the input with input(), solve the problem and print the answer.
+
+', true, 'public', 'published', false, true)
+on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
+  statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
+  constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
+delete from public.test_cases where problem_id = (select id from public.problems where slug = 'quiz-c-m6-count-uppercase');
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 0, 'Hello World', '2', true from public.problems where slug = 'quiz-c-m6-count-uppercase';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 1, 'campuscode', '0', false from public.problems where slug = 'quiz-c-m6-count-uppercase';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 2, 'ABC def GHI', '6', false from public.problems where slug = 'quiz-c-m6-count-uppercase';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 3, 'C Programming In Bangla 2026!', '4', false from public.problems where slug = 'quiz-c-m6-count-uppercase';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 4, 'Z', '1', false from public.problems where slug = 'quiz-c-m6-count-uppercase';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 5, '123 !? xyz', '0', false from public.problems where slug = 'quiz-c-m6-count-uppercase';
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, problem_id, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'strings')), 'c-m6-p1', 'code', 7, 'Programming problem: Count Capital Letters', (select id from public.problems where slug = 'quiz-c-m6-count-uppercase'), '"Hello World" contains H and W.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = null, options = null, problem_id = excluded.problem_id, explanation = excluded.explanation;
+insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
+values ('quiz-c-m6-reverse-word', 'Reverse a Word', 'শব্দ উল্টে দাও', 'Read a single word (no spaces) and print it reversed.', 'একটি শব্দ (স্পেস ছাড়া) পড়ে সেটিকে উল্টো করে প্রিন্ট করো।', 'One word of letters and digits.', 'The word reversed.',
+  '1 ≤ length ≤ 100', '"CampusCode" reversed is "edoCsupmaC".', array['strlen() gives the length; print from the last index down to 0.']::text[], 'easy', null,
+  '#include <stdio.h>
+
+int main(void) {
+    /* Read the input, solve the problem and print the answer. */
+
+    return 0;
+}
+', '# Read the input with input(), solve the problem and print the answer.
+
+', true, 'public', 'published', false, true)
+on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
+  statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
+  constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
+delete from public.test_cases where problem_id = (select id from public.problems where slug = 'quiz-c-m6-reverse-word');
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 0, 'CampusCode', 'edoCsupmaC', true from public.problems where slug = 'quiz-c-m6-reverse-word';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 1, 'a', 'a', false from public.problems where slug = 'quiz-c-m6-reverse-word';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 2, 'level', 'level', false from public.problems where slug = 'quiz-c-m6-reverse-word';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 3, 'abc123', '321cba', false from public.problems where slug = 'quiz-c-m6-reverse-word';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 4, 'Dhaka', 'akahD', false from public.problems where slug = 'quiz-c-m6-reverse-word';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 5, 'ZzYy', 'yYzZ', false from public.problems where slug = 'quiz-c-m6-reverse-word';
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, problem_id, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'strings')), 'c-m6-p2', 'code', 8, 'Programming problem: Reverse a Word', (select id from public.problems where slug = 'quiz-c-m6-reverse-word'), '"CampusCode" reversed is "edoCsupmaC".'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = null, options = null, problem_id = excluded.problem_id, explanation = excluded.explanation;
+delete from public.quiz_questions where quiz_id = (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'strings')) and key <> all(array['c-m6-q1', 'c-m6-q2', 'c-m6-q3', 'c-m6-q4', 'c-m6-q5', 'c-m6-q6', 'c-m6-p1', 'c-m6-p2']::text[]);
+insert into public.module_quizzes (course_id, chapter_id, title_en, title_bn, pass_min_correct, is_published)
+select ch.course_id, ch.id, 'Module 7 Quiz: Structures and Pointers', 'মডিউল ৭ কুইজ: স্ট্রাকচার ও পয়েন্টার', 6, true from public.chapters ch where ch.id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'structures-and-pointers')
+on conflict (chapter_id) do update set title_en = excluded.title_en, title_bn = excluded.title_bn, pass_min_correct = excluded.pass_min_correct;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'structures-and-pointers')), 'c-m7-q1', 'mcq', 1, 'What does this program print?', '#include <stdio.h>
+
+struct Point {
+    int x;
+    int y;
+};
+
+int main(void) {
+    struct Point p = {3, 4};
+    printf("%d", p.x * p.y);
+    return 0;
+}', '[{"id":"2bfeb5406919","text":"12"},{"id":"39175e59af4d","text":"7"},{"id":"d151b76d0789","text":"34"},{"id":"d96a8ca6da2f","text":"0"}]'::jsonb, 'p.x is 3 and p.y is 4; 3 × 4 = 12.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '2bfeb5406919' from public.quiz_questions where key = 'c-m7-q1'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'structures-and-pointers')), 'c-m7-q2', 'mcq', 2, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    int a = 10;
+    int *p = &a;
+    *p = 25;
+    printf("%d", a);
+    return 0;
+}', '[{"id":"2f8baac8aaeb","text":"25"},{"id":"a48e9898b2e0","text":"10"},{"id":"59ce7e3a31ca","text":"35"},{"id":"4e8a8074e423","text":"The address of a"}]'::jsonb, 'p points to a, so assigning through *p changes a itself.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '2f8baac8aaeb' from public.quiz_questions where key = 'c-m7-q2'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'structures-and-pointers')), 'c-m7-q3', 'mcq', 3, 'Which operator gives the memory address of a variable?', null, '[{"id":"0091b35d0383","text":"&"},{"id":"9f59980eb573","text":"*"},{"id":"d476c67eab69","text":"->"},{"id":"59930074aceb","text":"%"}]'::jsonb, '&x is the address of x; * dereferences a pointer.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '0091b35d0383' from public.quiz_questions where key = 'c-m7-q3'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'structures-and-pointers')), 'c-m7-q4', 'mcq', 4, 'Which statement about calloc() is true?', null, '[{"id":"5ee5c8cfeb0f","text":"It allocates memory for an array of elements and sets every byte to zero"},{"id":"8e86cf57bca0","text":"It frees memory that was allocated earlier"},{"id":"6b478b24800a","text":"It can only shrink an existing block"},{"id":"461cd58effc6","text":"It allocates memory on the stack"}]'::jsonb, 'calloc(n, size) allocates n × size bytes and zero-initialises them; malloc() does not initialise.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '5ee5c8cfeb0f' from public.quiz_questions where key = 'c-m7-q4'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'structures-and-pointers')), 'c-m7-q5', 'mcq', 5, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    int arr[] = {10, 20, 30, 40};
+    int *p = arr;
+    printf("%d", *(p + 2));
+    return 0;
+}', '[{"id":"f551735e63b7","text":"30"},{"id":"776ad88e5f5d","text":"20"},{"id":"2e3223775c28","text":"12"},{"id":"d111f60ec70e","text":"40"}]'::jsonb, 'p + 2 points to arr[2], whose value is 30.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, 'f551735e63b7' from public.quiz_questions where key = 'c-m7-q5'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'structures-and-pointers')), 'c-m7-q6', 'mcq', 6, 'After you have finished using memory obtained from malloc() or realloc(), which function should you call?', null, '[{"id":"40f1fd16fb54","text":"free()"},{"id":"d2f2d28669ce","text":"delete()"},{"id":"005f0939b02c","text":"release()"},{"id":"ac6192c95501","text":"fclose()"}]'::jsonb, 'free() returns dynamically allocated memory to the system.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '40f1fd16fb54' from public.quiz_questions where key = 'c-m7-q6'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
+values ('quiz-c-m7-largest-rectangle', 'Largest Rectangle (struct)', 'সবচেয়ে বড় আয়তক্ষেত্র (struct)', 'Store N rectangles in an array of `struct Rect { int w; int h; };`. Print the 1-based position of the rectangle with the largest area, followed by that area. If several have the same largest area, choose the first one.', 'N টি আয়তক্ষেত্র `struct Rect { int w; int h; };` এর অ্যারেতে রাখো। সবচেয়ে বড় ক্ষেত্রফলের আয়তক্ষেত্রের অবস্থান (১ থেকে গণনা) এবং সেই ক্ষেত্রফল প্রিন্ট করো। সমান হলে প্রথমটি নাও।', 'First line: N. Then N lines, each with w and h.', 'Two integers: the position and the area.',
+  '1 ≤ N ≤ 100, 1 ≤ w, h ≤ 10000', 'Areas are 6, 20 and 20; the first largest is rectangle 2.', array['Keep the index of the best rectangle seen so far.', 'Use > (not >=) so the first one wins a tie.']::text[], 'medium', null,
+  '#include <stdio.h>
+
+int main(void) {
+    /* Read the input, solve the problem and print the answer. */
+
+    return 0;
+}
+', '# Read the input with input(), solve the problem and print the answer.
+
+', true, 'public', 'published', false, true)
+on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
+  statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
+  constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
+delete from public.test_cases where problem_id = (select id from public.problems where slug = 'quiz-c-m7-largest-rectangle');
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 0, '3
+2 3
+4 5
+10 2', '2 20', true from public.problems where slug = 'quiz-c-m7-largest-rectangle';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 1, '1
+7 7', '1 49', false from public.problems where slug = 'quiz-c-m7-largest-rectangle';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 2, '4
+1 1
+2 2
+3 3
+4 4', '4 16', false from public.problems where slug = 'quiz-c-m7-largest-rectangle';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 3, '3
+10000 10000
+1 1
+10000 10000', '1 100000000', false from public.problems where slug = 'quiz-c-m7-largest-rectangle';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 4, '5
+3 4
+6 2
+2 6
+1 12
+12 1', '1 12', false from public.problems where slug = 'quiz-c-m7-largest-rectangle';
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, problem_id, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'structures-and-pointers')), 'c-m7-p1', 'code', 7, 'Programming problem: Largest Rectangle (struct)', (select id from public.problems where slug = 'quiz-c-m7-largest-rectangle'), 'Areas are 6, 20 and 20; the first largest is rectangle 2.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = null, options = null, problem_id = excluded.problem_id, explanation = excluded.explanation;
+insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
+values ('quiz-c-m7-prefix-sums', 'Running Totals with malloc()', 'malloc() দিয়ে ক্রমযোজিত যোগফল', 'Read N, allocate an array of N integers with `malloc()`, read the values, and print the running totals: the i-th output is the sum of the first i values. Free the memory before the program ends.', 'N পড়ে `malloc()` দিয়ে N টি পূর্ণসংখ্যার অ্যারে তৈরি করো, মানগুলো পড়ো এবং ক্রমযোজিত যোগফল প্রিন্ট করো: i-তম আউটপুট হলো প্রথম i টি মানের যোগফল। প্রোগ্রাম শেষের আগে মেমোরি free করো।', 'First line: N. Second line: N integers.', 'N running totals separated by single spaces.',
+  '1 ≤ N ≤ 100000, -10^6 ≤ each value ≤ 10^6', 'For 1 2 3 4 the totals are 1, 3, 6 and 10.', array['int *a = malloc(n * sizeof(int));', 'Totals can exceed int: use long long for the running sum.']::text[], 'medium', null,
+  '#include <stdio.h>
+
+int main(void) {
+    /* Read the input, solve the problem and print the answer. */
+
+    return 0;
+}
+', '# Read the input with input(), solve the problem and print the answer.
+
+', true, 'public', 'published', false, true)
+on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
+  statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
+  constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
+delete from public.test_cases where problem_id = (select id from public.problems where slug = 'quiz-c-m7-prefix-sums');
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 0, '4
+1 2 3 4', '1 3 6 10', true from public.problems where slug = 'quiz-c-m7-prefix-sums';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 1, '1
+-5', '-5', false from public.problems where slug = 'quiz-c-m7-prefix-sums';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 2, '5
+1000000 1000000 1000000 1000000 1000000', '1000000 2000000 3000000 4000000 5000000', false from public.problems where slug = 'quiz-c-m7-prefix-sums';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 3, '6
+3 -3 3 -3 3 -3', '3 0 3 0 3 0', false from public.problems where slug = 'quiz-c-m7-prefix-sums';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 4, '3
+0 0 0', '0 0 0', false from public.problems where slug = 'quiz-c-m7-prefix-sums';
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, problem_id, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'structures-and-pointers')), 'c-m7-p2', 'code', 8, 'Programming problem: Running Totals with malloc()', (select id from public.problems where slug = 'quiz-c-m7-prefix-sums'), 'For 1 2 3 4 the totals are 1, 3, 6 and 10.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = null, options = null, problem_id = excluded.problem_id, explanation = excluded.explanation;
+delete from public.quiz_questions where quiz_id = (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'structures-and-pointers')) and key <> all(array['c-m7-q1', 'c-m7-q2', 'c-m7-q3', 'c-m7-q4', 'c-m7-q5', 'c-m7-q6', 'c-m7-p1', 'c-m7-p2']::text[]);
+insert into public.module_quizzes (course_id, chapter_id, title_en, title_bn, pass_min_correct, is_published)
+select ch.course_id, ch.id, 'Module 8 Quiz: Files and the Preprocessor', 'মডিউল ৮ কুইজ: ফাইল ও প্রিপ্রসেসর', 6, true from public.chapters ch where ch.id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'files-and-preprocessor')
+on conflict (chapter_id) do update set title_en = excluded.title_en, title_bn = excluded.title_bn, pass_min_correct = excluded.pass_min_correct;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'files-and-preprocessor')), 'c-m8-q1', 'mcq', 1, 'Which fopen() mode opens a text file for writing at the end of the file, keeping its existing contents?', null, '[{"id":"82f40e3e20c9","text":"\"a\""},{"id":"cc4018d15843","text":"\"w\""},{"id":"5abb75b9e32f","text":"\"r\""},{"id":"7ddc90c6e7ab","text":"\"x\""}]'::jsonb, '"a" (append) adds to the end; "w" erases the file first; "r" only reads.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '82f40e3e20c9' from public.quiz_questions where key = 'c-m8-q1'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'files-and-preprocessor')), 'c-m8-q2', 'mcq', 2, 'What does fopen() return if the file cannot be opened?', null, '[{"id":"3d13b1ae3c49","text":"NULL"},{"id":"b770d7b382f5","text":"0 bytes of data"},{"id":"1c70ca05f2b6","text":"EOF"},{"id":"f5dd3de7fce8","text":"An empty file"}]'::jsonb, 'Always check the returned FILE * against NULL before using it.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '3d13b1ae3c49' from public.quiz_questions where key = 'c-m8-q2'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'files-and-preprocessor')), 'c-m8-q3', 'mcq', 3, 'What does this program print?', '#include <stdio.h>
+#define SQUARE(x) ((x) * (x))
+
+int main(void) {
+    printf("%d", SQUARE(3 + 1));
+    return 0;
+}', '[{"id":"1fff887be50c","text":"16"},{"id":"a9ca824458bc","text":"7"},{"id":"3504b41f1076","text":"10"},{"id":"9d9455cff48c","text":"4"}]'::jsonb, 'The macro expands to ((3 + 1) * (3 + 1)) = 16; the parentheses in the macro make this safe.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '1fff887be50c' from public.quiz_questions where key = 'c-m8-q3'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'files-and-preprocessor')), 'c-m8-q4', 'mcq', 4, 'What does `#include <stdio.h>` do?', null, '[{"id":"2f160aeb571a","text":"It inserts the contents of the header file, which declares functions like printf() and scanf()"},{"id":"82782336652f","text":"It links the program with the internet"},{"id":"f13ee9437735","text":"It defines the main() function"},{"id":"5b07c277020f","text":"It runs the program in standard mode"}]'::jsonb, 'The preprocessor copies the header''s declarations into your file before compilation.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '2f160aeb571a' from public.quiz_questions where key = 'c-m8-q4'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'files-and-preprocessor')), 'c-m8-q5', 'mcq', 5, '`fgets(buf, 10, fp)` reads at most how many characters into buf, not counting the terminating ''\0''?', null, '[{"id":"ca967a5d8628","text":"9"},{"id":"0fc486ebb42d","text":"10"},{"id":"7071e7dd6518","text":"11"},{"id":"aa4256b35586","text":"Until the end of the file"}]'::jsonb, 'fgets() reads at most n − 1 characters and always leaves room for ''\0''.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, 'ca967a5d8628' from public.quiz_questions where key = 'c-m8-q5'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'files-and-preprocessor')), 'c-m8-q6', 'mcq', 6, 'What does fscanf() return when it reaches the end of the file before reading any value?', null, '[{"id":"2426cc082e9a","text":"EOF"},{"id":"9c182c6f054c","text":"NULL"},{"id":"7de2936bfe25","text":"The last value it read"},{"id":"2aefb70bd126","text":"1"}]'::jsonb, 'fscanf() returns EOF when input ends before the first conversion; loops often use while (fscanf(...) == 1).'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '2426cc082e9a' from public.quiz_questions where key = 'c-m8-q6'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
+values ('quiz-c-m8-notes-file', 'Notes File Round Trip', 'নোট ফাইলে লেখা ও পড়া', 'Read N and then N lines of text. Write the lines to a file named `notes.txt` with `fputs()`, close it, open it again for reading, and print every line read back with `fgets()` prefixed by its line number and a colon, like `1: first line`.', 'N এবং তারপর N লাইন টেক্সট পড়ো। লাইনগুলো `fputs()` দিয়ে `notes.txt` ফাইলে লেখো, ফাইল বন্ধ করো, আবার পড়ার জন্য খোলো এবং `fgets()` দিয়ে পড়া প্রতিটি লাইন তার লাইন নম্বর ও কোলনসহ প্রিন্ট করো, যেমন `1: first line`।', 'First line: N. Then N lines (each up to 100 characters, may contain spaces).', 'N lines in the form `k: text`.',
+  '1 ≤ N ≤ 50', 'Each line is written to the file and read back in the same order.', array['After scanf("%d", &n), consume the rest of the line before using fgets() on stdin.', 'Always check that fopen() did not return NULL, and call fclose() after writing.']::text[], 'medium', null,
+  '#include <stdio.h>
+
+int main(void) {
+    /* Read the input, solve the problem and print the answer. */
+
+    return 0;
+}
+', '# Read the input with input(), solve the problem and print the answer.
+
+', true, 'public', 'published', false, true)
+on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
+  statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
+  constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
+delete from public.test_cases where problem_id = (select id from public.problems where slug = 'quiz-c-m8-notes-file');
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 0, '2
+hello world
+second line', '1: hello world
+2: second line', true from public.problems where slug = 'quiz-c-m8-notes-file';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 1, '1
+CampusCode', '1: CampusCode', false from public.problems where slug = 'quiz-c-m8-notes-file';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 2, '3
+a b c
+123
+last line here', '1: a b c
+2: 123
+3: last line here', false from public.problems where slug = 'quiz-c-m8-notes-file';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 3, '4
+One
+Two
+Three
+Four', '1: One
+2: Two
+3: Three
+4: Four', false from public.problems where slug = 'quiz-c-m8-notes-file';
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, problem_id, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'files-and-preprocessor')), 'c-m8-p1', 'code', 7, 'Programming problem: Notes File Round Trip', (select id from public.problems where slug = 'quiz-c-m8-notes-file'), 'Each line is written to the file and read back in the same order.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = null, options = null, problem_id = excluded.problem_id, explanation = excluded.explanation;
+insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
+values ('quiz-c-m8-circle-define', 'Circle with #define', '#define দিয়ে বৃত্ত', 'Define the constant `#define PI 3.14159` and use it to print the area (PI × r × r) and the circumference (2 × PI × r) of a circle with radius r, each rounded to 2 decimal places.', '`#define PI 3.14159` ধ্রুবক সংজ্ঞায়িত করে r ব্যাসার্ধের বৃত্তের ক্ষেত্রফল (PI × r × r) ও পরিধি (2 × PI × r) দুই দশমিক ঘর পর্যন্ত প্রিন্ট করো।', 'A single real number r.', 'Two lines: `Area = A` and `Circumference = C`, both with two decimals.',
+  '0 < r ≤ 1000', 'For r = 1: area 3.14, circumference 6.28.', array['Read r with %lf into a double.', 'printf("%.2f", x) prints two decimals.']::text[], 'easy', null,
+  '#include <stdio.h>
+
+int main(void) {
+    /* Read the input, solve the problem and print the answer. */
+
+    return 0;
+}
+', '# Read the input with input(), solve the problem and print the answer.
+
+', true, 'public', 'published', false, true)
+on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
+  statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
+  constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
+delete from public.test_cases where problem_id = (select id from public.problems where slug = 'quiz-c-m8-circle-define');
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 0, '1', 'Area = 3.14
+Circumference = 6.28', true from public.problems where slug = 'quiz-c-m8-circle-define';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 1, '2.5', 'Area = 19.63
+Circumference = 15.71', false from public.problems where slug = 'quiz-c-m8-circle-define';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 2, '10', 'Area = 314.16
+Circumference = 62.83', false from public.problems where slug = 'quiz-c-m8-circle-define';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 3, '0.1', 'Area = 0.03
+Circumference = 0.63', false from public.problems where slug = 'quiz-c-m8-circle-define';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 4, '1000', 'Area = 3141590.00
+Circumference = 6283.18', false from public.problems where slug = 'quiz-c-m8-circle-define';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 5, '7.75', 'Area = 188.69
+Circumference = 48.69', false from public.problems where slug = 'quiz-c-m8-circle-define';
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, problem_id, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'files-and-preprocessor')), 'c-m8-p2', 'code', 8, 'Programming problem: Circle with #define', (select id from public.problems where slug = 'quiz-c-m8-circle-define'), 'For r = 1: area 3.14, circumference 6.28.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = null, options = null, problem_id = excluded.problem_id, explanation = excluded.explanation;
+delete from public.quiz_questions where quiz_id = (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'files-and-preprocessor')) and key <> all(array['c-m8-q1', 'c-m8-q2', 'c-m8-q3', 'c-m8-q4', 'c-m8-q5', 'c-m8-q6', 'c-m8-p1', 'c-m8-p2']::text[]);
+insert into public.module_quizzes (course_id, chapter_id, title_en, title_bn, pass_min_correct, is_published)
+select ch.course_id, ch.id, 'Module 9 Quiz: Projects', 'মডিউল ৯ কুইজ: প্রজেক্ট', 6, true from public.chapters ch where ch.id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'projects')
+on conflict (chapter_id) do update set title_en = excluded.title_en, title_bn = excluded.title_bn, pass_min_correct = excluded.pass_min_correct;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'projects')), 'c-m9-q1', 'mcq', 1, 'Which of these years is a leap year?', null, '[{"id":"5b59e6325232","text":"2000"},{"id":"d9224057a118","text":"1900"},{"id":"52a3c5007de4","text":"2100"},{"id":"d067603fbd1d","text":"2023"}]'::jsonb, 'Century years are leap years only if divisible by 400: 2000 is, 1900 and 2100 are not.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '5b59e6325232' from public.quiz_questions where key = 'c-m9-q1'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'projects')), 'c-m9-q2', 'mcq', 2, 'Which condition correctly checks whether year y is a leap year?', null, '[{"id":"64380f7924b4","text":"(y % 4 == 0 && y % 100 != 0) || y % 400 == 0"},{"id":"6221b8c69e1c","text":"y % 4 == 0"},{"id":"684df437ceee","text":"y % 100 == 0 && y % 400 != 0"},{"id":"c41731eab62c","text":"y % 4 == 0 || y % 100 == 0"}]'::jsonb, 'Divisible by 4 but not by 100, unless it is also divisible by 400.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '64380f7924b4' from public.quiz_questions where key = 'c-m9-q2'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'projects')), 'c-m9-q3', 'mcq', 3, 'What does this program print?', '#include <stdio.h>
+
+int main(void) {
+    int total = 3725;
+    int h = total / 3600;
+    int m = (total % 3600) / 60;
+    int s = total % 60;
+    printf("%02d:%02d:%02d", h, m, s);
+    return 0;
+}', '[{"id":"748744c4aeeb","text":"01:02:05"},{"id":"513d1e7451d6","text":"01:20:05"},{"id":"0ef25c8684d8","text":"1:2:5"},{"id":"39b7e62113d8","text":"00:62:05"}]'::jsonb, '3725 s = 1 hour (3600 s) + 2 minutes (120 s) + 5 seconds; %02d pads with a zero.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '748744c4aeeb' from public.quiz_questions where key = 'c-m9-q3'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'projects')), 'c-m9-q4', 'mcq', 4, 'In a digital stopwatch that shows minutes and seconds, what should happen when the seconds value reaches 60?', null, '[{"id":"437d0823eba5","text":"Seconds reset to 0 and minutes increase by 1"},{"id":"2dff1f93c6a7","text":"Seconds keep increasing to 61"},{"id":"f15c6638547f","text":"Minutes reset to 0"},{"id":"22568f541bdf","text":"The stopwatch stops"}]'::jsonb, 'Each unit rolls over into the next: 60 seconds make one minute.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '437d0823eba5' from public.quiz_questions where key = 'c-m9-q4'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'projects')), 'c-m9-q5', 'mcq', 5, 'If 1 January is a Monday, which day of the week is 1 February of the same year?', null, '[{"id":"15424b8d3142","text":"Thursday"},{"id":"cc6d3271dfa6","text":"Wednesday"},{"id":"f6a88435a502","text":"Friday"},{"id":"a1e3ee3eaaca","text":"Monday"}]'::jsonb, 'January has 31 days; 31 % 7 = 3, so the weekday moves 3 days forward from Monday.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '15424b8d3142' from public.quiz_questions where key = 'c-m9-q5'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, code, options, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'projects')), 'c-m9-q6', 'mcq', 6, 'A calendar app prints dates with `printf("%3d", day);`. What does %3d do?', null, '[{"id":"4244fb52c2c0","text":"Prints the integer right-aligned in a field at least 3 characters wide"},{"id":"4014c3dc3f6e","text":"Prints only the first 3 digits"},{"id":"374cad752171","text":"Prints the number 3 times"},{"id":"8f7eaffc6364","text":"Prints the number with 3 decimal places"}]'::jsonb, 'The width 3 pads with spaces on the left, so the calendar columns line up.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = excluded.code, options = excluded.options, problem_id = null, explanation = excluded.explanation;
+insert into public.quiz_answer_keys (question_id, correct_option)
+select id, '4244fb52c2c0' from public.quiz_questions where key = 'c-m9-q6'
+on conflict (question_id) do update set correct_option = excluded.correct_option;
+insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
+values ('quiz-c-m9-stopwatch-display', 'Stopwatch Display', 'স্টপওয়াচ ডিসপ্লে', 'A stopwatch has counted **T** seconds. Print the time as `HH:MM:SS`, each part with at least two digits (hours may grow beyond 99).', 'একটি স্টপওয়াচ **T** সেকেন্ড গুনেছে। সময়টি `HH:MM:SS` আকারে প্রিন্ট করো, প্রতিটি অংশ কমপক্ষে দুই অঙ্কের (ঘণ্টা ৯৯-এর বেশি হতে পারে)।', 'A single integer T.', 'The time as HH:MM:SS.',
+  '0 ≤ T ≤ 1 000 000', '3725 seconds is 1 hour, 2 minutes and 5 seconds: 01:02:05.', array['Hours = T / 3600, minutes = (T % 3600) / 60, seconds = T % 60.', '%02d pads with a leading zero.']::text[], 'easy', null,
+  '#include <stdio.h>
+
+int main(void) {
+    /* Read the input, solve the problem and print the answer. */
+
+    return 0;
+}
+', '# Read the input with input(), solve the problem and print the answer.
+
+', true, 'public', 'published', false, true)
+on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
+  statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
+  constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
+delete from public.test_cases where problem_id = (select id from public.problems where slug = 'quiz-c-m9-stopwatch-display');
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 0, '3725', '01:02:05', true from public.problems where slug = 'quiz-c-m9-stopwatch-display';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 1, '0', '00:00:00', false from public.problems where slug = 'quiz-c-m9-stopwatch-display';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 2, '59', '00:00:59', false from public.problems where slug = 'quiz-c-m9-stopwatch-display';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 3, '60', '00:01:00', false from public.problems where slug = 'quiz-c-m9-stopwatch-display';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 4, '86399', '23:59:59', false from public.problems where slug = 'quiz-c-m9-stopwatch-display';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 5, '1000000', '277:46:40', false from public.problems where slug = 'quiz-c-m9-stopwatch-display';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 6, '3600', '01:00:00', false from public.problems where slug = 'quiz-c-m9-stopwatch-display';
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, problem_id, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'projects')), 'c-m9-p1', 'code', 7, 'Programming problem: Stopwatch Display', (select id from public.problems where slug = 'quiz-c-m9-stopwatch-display'), '3725 seconds is 1 hour, 2 minutes and 5 seconds: 01:02:05.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = null, options = null, problem_id = excluded.problem_id, explanation = excluded.explanation;
+insert into public.problems (slug, title, title_bn, statement, statement_bn, input_format, output_format, constraints, explanation,
+  hints, difficulty, topic_id, starter_code_c, starter_code_python, is_official, visibility, status, is_featured, is_quiz_item)
+values ('quiz-c-m9-days-in-month', 'Days in a Month', 'মাসে কত দিন', 'Read a month number (1–12) and a year, and print how many days that month has, using the Gregorian leap-year rule for February.', 'মাসের নম্বর (১–১২) ও বছর পড়ে সেই মাসে কত দিন তা প্রিন্ট করো। ফেব্রুয়ারির জন্য গ্রেগরিয়ান লিপ-ইয়ার নিয়ম ব্যবহার করো।', 'One line with two integers: month and year.', 'A single integer: the number of days.',
+  '1 ≤ month ≤ 12, 1 ≤ year ≤ 9999', 'February 2024 has 29 days because 2024 is a leap year.', array['Leap year: (y % 4 == 0 && y % 100 != 0) || y % 400 == 0.', 'A switch on the month keeps the 30/31-day months tidy.']::text[], 'easy', null,
+  '#include <stdio.h>
+
+int main(void) {
+    /* Read the input, solve the problem and print the answer. */
+
+    return 0;
+}
+', '# Read the input with input(), solve the problem and print the answer.
+
+', true, 'public', 'published', false, true)
+on conflict (slug) do update set title = excluded.title, title_bn = excluded.title_bn, statement = excluded.statement,
+  statement_bn = excluded.statement_bn, input_format = excluded.input_format, output_format = excluded.output_format,
+  constraints = excluded.constraints, explanation = excluded.explanation, hints = excluded.hints, difficulty = excluded.difficulty,
+  topic_id = excluded.topic_id, starter_code_c = excluded.starter_code_c, starter_code_python = excluded.starter_code_python,
+  is_quiz_item = excluded.is_quiz_item;
+delete from public.test_cases where problem_id = (select id from public.problems where slug = 'quiz-c-m9-days-in-month');
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 0, '2 2024', '29', true from public.problems where slug = 'quiz-c-m9-days-in-month';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 1, '2 1900', '28', false from public.problems where slug = 'quiz-c-m9-days-in-month';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 2, '2 2000', '29', false from public.problems where slug = 'quiz-c-m9-days-in-month';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 3, '2 2023', '28', false from public.problems where slug = 'quiz-c-m9-days-in-month';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 4, '1 2023', '31', false from public.problems where slug = 'quiz-c-m9-days-in-month';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 5, '4 2023', '30', false from public.problems where slug = 'quiz-c-m9-days-in-month';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 6, '12 9999', '31', false from public.problems where slug = 'quiz-c-m9-days-in-month';
+insert into public.test_cases (problem_id, sort_order, input, expected_output, is_sample)
+select id, 7, '9 1', '30', false from public.problems where slug = 'quiz-c-m9-days-in-month';
+insert into public.quiz_questions (quiz_id, key, kind, sort_order, prompt, problem_id, explanation)
+select (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'projects')), 'c-m9-p2', 'code', 8, 'Programming problem: Days in a Month', (select id from public.problems where slug = 'quiz-c-m9-days-in-month'), 'February 2024 has 29 days because 2024 is a leap year.'
+on conflict (key) do update set quiz_id = excluded.quiz_id, kind = excluded.kind, sort_order = excluded.sort_order, prompt = excluded.prompt,
+  code = null, options = null, problem_id = excluded.problem_id, explanation = excluded.explanation;
+delete from public.quiz_questions where quiz_id = (select id from public.module_quizzes where chapter_id = (select ch.id from public.chapters ch join public.courses c on c.id = ch.course_id where c.slug = 'c-programming' and ch.slug = 'projects')) and key <> all(array['c-m9-q1', 'c-m9-q2', 'c-m9-q3', 'c-m9-q4', 'c-m9-q5', 'c-m9-q6', 'c-m9-p1', 'c-m9-p2']::text[]);
+insert into public.course_certificate_settings (course_id, enabled)
+select id, true from public.courses where slug = 'c-programming' on conflict (course_id) do nothing;
 
 commit;

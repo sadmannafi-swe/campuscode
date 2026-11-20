@@ -9,7 +9,8 @@ insert into auth.users (id, email, raw_user_meta_data) values
   ('00000000-0000-0000-0000-0000000000c3', 'cert-c@test.dev', '{"full_name":"Chaitee Das"}'),
   ('00000000-0000-0000-0000-0000000000c4', 'cert-d@test.dev', '{"full_name":"Dipu Saha"}'),
   ('00000000-0000-0000-0000-0000000000ca', 'cert-admin@test.dev', '{"full_name":"Cert Admin"}');
-insert into public.user_roles (user_id, role) values ('00000000-0000-0000-0000-0000000000ca', 'admin');
+delete from public.admin_identity;   -- single-admin table: this file's admin replaces the previous fixture's
+insert into public.admin_identity (user_id, email) values ('00000000-0000-0000-0000-0000000000ca', 'cert-admin@test.dev');
 
 insert into public.courses (id, slug, language, title_en, title_bn, is_published) values
   ('00000000-0000-0000-0000-00000000c0a1', 'cert-test-a', 'c', 'Certificate Test Course A', 'ক', true),
@@ -38,7 +39,7 @@ grant select on ids to anon, authenticated;
 do $$ declare e jsonb; begin
   e := public.course_certificate_config('00000000-0000-0000-0000-00000000c0a1');
   assert not (e->>'configured')::boolean, 'unconfigured course';
-  assert e->'missing' ?& array['certificates_disabled', 'no_practice_requirements', 'no_final_assessment'], 'missing list: ' || (e->'missing')::text;
+  assert e->'missing' ?& array['certificates_disabled', 'no_verified_requirement'], 'missing list: ' || (e->'missing')::text;
   assert (e->>'lessons')::int = 2, 'only published lessons count (draft excluded)';
 end $$;
 
@@ -101,8 +102,16 @@ do $$ declare c public.certificates; begin
      and c.course_title = 'Certificate Test Course A', 'snapshot fields: ' || to_jsonb(c)::text;
   assert c.certificate_number ~ '^CC-[0-9]{4}-[A-HJ-NP-Z2-9]{8}$', 'number format ' || c.certificate_number;
   assert c.verification_token ~ '^[A-Za-z0-9_-]{32}$', 'token format';
+  -- Not issued until the PDF is stored: no notification, not publicly verifiable yet.
+  assert (select count(*) from public.notifications where user_id = c.user_id and kind = 'certificate') = 0, 'no notification before PDF';
+  assert (select count(*) from public.certificate_events where certificate_id = c.id and event = 'queued') = 1, 'queued event logged';
+  assert (select status from public.verify_certificate(c.verification_token)) = 'not_found', 'pending certificate does not verify';
+  -- the Edge Function stores the PDF → issued: one notification + issued event (S14)
+  update public.certificates set pdf_path = c.user_id || '/' || c.certificate_number || '.pdf', pdf_generated_at = now() where id = c.id;
+  update public.certificates set pdf_path = pdf_path where id = c.id;    -- a retry touching the row again
   assert (select count(*) from public.notifications where user_id = c.user_id and kind = 'certificate') = 1, 'one notification';
   assert (select count(*) from public.certificate_events where certificate_id = c.id and event = 'issued') = 1, 'issued event logged';
+  assert (select status from public.verify_certificate(c.verification_token)) = 'valid', 'issued certificate verifies';
 end $$;
 
 -- ---------- Scenario 6: repeated issuance → no duplicate ----------
@@ -249,6 +258,13 @@ do $$ begin
 end $$;
 reset role;
 
+-- simulate the Edge Function storing every remaining PDF
+update public.certificates set pdf_path = user_id || '/' || certificate_number || '.pdf', pdf_generated_at = now() where pdf_path is null;
+do $$ begin
+  assert (select count(*) from public.notifications where kind = 'certificate') = (select count(*) from public.certificates),
+    'exactly one notification per issued certificate';
+end $$;
+
 -- ---------- Scenarios 8–10, 15: public verification ----------
 set role anon;
 do $$ declare tok text; r record; begin
@@ -289,7 +305,7 @@ do $$ declare cid uuid; tok text; r record; n int; begin
   select * into r from public.verify_certificate(tok);
   assert r.status = 'revoked', 'S9 revoked shows revoked';
   assert (select count(*) from public.admin_list_certificates('', null, 'revoked')) = 1, 'admin filter by status';
-  assert jsonb_array_length(public.admin_certificate_detail(cid)->'events') = 2, 'issued + revoked events';
+  assert jsonb_array_length(public.admin_certificate_detail(cid)->'events') = 3, 'queued + issued + revoked events';
   begin
     perform public.admin_revoke_certificate(cid, 'again again');
     raise exception 'FAIL: double revoke';
@@ -308,6 +324,7 @@ end $$;
 
 -- clean up fixture
 delete from public.certificates where course_id in ('00000000-0000-0000-0000-00000000c0a1', '00000000-0000-0000-0000-00000000c0b1');
+delete from public.admin_identity where email = 'cert-admin@test.dev';
 delete from auth.users where email like 'cert-%@test.dev';
 delete from public.problems where slug like 'cert-%';
 delete from public.courses where slug like 'cert-test-%';
