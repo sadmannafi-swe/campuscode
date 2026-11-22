@@ -124,13 +124,19 @@ The live deployment's public values are committed in `.env.production` (Supabase
 
 ### Administrator (one-time bootstrap at `/ccadmingo`)
 
-CampusCode has **exactly one administrator**, fixed by a one-time setup:
+CampusCode has **exactly one administrator**, fixed by a one-time setup protected by a **deployment-controlled secret**:
 
-1. Open `https://<your-site>/ccadmingo` and choose **Continue with Google**.
-2. The first account that completes setup with a **verified Google (Gmail) identity** claims the single admin slot (`claim_initial_admin()`, an atomic insert into the one-row `admin_identity` table). Email/password accounts cannot claim it.
-3. From then on `/ccadmingo` shows only an administrator sign-in; any other account — including valid student accounts — is shown *Access denied*. `/admin/*` redirects guests to `/ccadmingo`.
+1. The project owner mints a one-time setup token in the Supabase SQL editor (owner-only; not reachable through the API):
+   ```sql
+   select private.issue_admin_setup_token();                     -- valid 30 minutes
+   -- select private.issue_admin_setup_token(interval '10 minutes');
+   -- select private.revoke_admin_setup_token();                 -- withdraw an unused token
+   ```
+   The token is shown once; only its SHA-256 hash is stored. With no valid token, setup is closed.
+2. Open `https://<your-site>/ccadmingo`, choose **Continue with Google**, paste the token and claim. The claim requires a **verified Google (Gmail) identity** *and* the valid, unexpired token (`claim_initial_admin(token)`, an atomic insert into the one-row `admin_identity` table). The token is consumed by the successful claim; email/password accounts cannot claim.
+3. From then on `/ccadmingo` shows only an administrator sign-in; any other account — including valid student accounts — is shown *Access denied*. `/admin/*` redirects guests to `/ccadmingo`. Tokens cannot be minted while an administrator exists.
 
-Admin status is computed only by `is_admin()` (= "is this the claimed identity"), never from e-mails or client flags. Roles cannot be granted from the dashboard, scripts or `bootstrap_admin` any more. To hand the role to someone else, the project owner runs in the SQL editor `delete from public.user_roles where role = 'admin'; delete from public.admin_identity;` and the next verified Google account claims it at `/ccadmingo`.
+Admin status is computed only by `is_admin()` (= "is this the claimed identity"), never from e-mails or client flags. Roles cannot be granted from the dashboard, scripts or `bootstrap_admin`. To hand the role to someone else, the project owner runs in the SQL editor `delete from public.user_roles where role = 'admin'; delete from public.admin_identity;`, then mints a new token as in step 1 and gives it only to the new administrator.
 
 ## Judge0 setup
 

@@ -261,17 +261,55 @@ do $$ begin
   assert not public.is_admin('00000000-0000-0000-0000-0000000000e1'), 'first student is not admin';
   assert (public.admin_setup_state()) = '{"claimed": false}'::jsonb, 'setup state: unclaimed';
 end $$;
+-- S1. with no deployment token minted, setup is closed — even for a verified Google account
 set role authenticated;
--- a password-only account cannot claim (no verified Google identity)
-select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000e5', false);
-do $$ begin
-  begin perform public.claim_initial_admin(); raise exception 'FAIL: unverified claim';
-  exception when insufficient_privilege then if sqlerrm <> 'admin_requires_verified_google' then raise; end if; end;
-end $$;
--- 24. first verified Google account through the setup flow → admin
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000e3', false);
 do $$ begin
-  assert (public.claim_initial_admin()->>'claimed')::boolean, 'claimed';
+  begin perform public.claim_initial_admin(null); raise exception 'FAIL: claimed without a token';
+  exception when insufficient_privilege then if sqlerrm <> 'admin_setup_token_invalid' then raise; end if; end;
+  -- S2. students cannot mint or read setup tokens (private schema is not reachable)
+  begin perform private.issue_admin_setup_token(); raise exception 'FAIL: student minted a token';
+  exception when insufficient_privilege then null; end;
+  begin perform * from private.admin_setup_token; raise exception 'FAIL: student read the token table';
+  exception when insufficient_privilege then null; end;
+end $$;
+reset role;
+-- the owner mints a one-time token (returned once; only its hash is stored)
+select set_config('test.tok', private.issue_admin_setup_token(), false);
+do $$ begin
+  assert (select count(*) from private.admin_setup_token) = 1, 'one token row';
+  assert (select token_hash from private.admin_setup_token) = sha256(convert_to(current_setting('test.tok'), 'UTF8')), 'only the hash is stored';
+  assert (select expires_at from private.admin_setup_token) <= now() + interval '30 minutes', 'token expires';
+end $$;
+set role authenticated;
+-- S3. a wrong token is rejected with the same generic error
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000e3', false);
+do $$ begin
+  begin perform public.claim_initial_admin('not-the-token'); raise exception 'FAIL: wrong token accepted';
+  exception when insufficient_privilege then if sqlerrm <> 'admin_setup_token_invalid' then raise; end if; end;
+end $$;
+-- a password-only account cannot claim even with the valid token (no verified Google identity)
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000e5', false);
+do $$ begin
+  begin perform public.claim_initial_admin(current_setting('test.tok')); raise exception 'FAIL: unverified claim';
+  exception when insufficient_privilege then if sqlerrm <> 'admin_requires_verified_google' then raise; end if; end;
+end $$;
+-- S4. an expired token is rejected
+reset role;
+update private.admin_setup_token set expires_at = now() - interval '1 second';
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000e3', false);
+do $$ begin
+  begin perform public.claim_initial_admin(current_setting('test.tok')); raise exception 'FAIL: expired token accepted';
+  exception when insufficient_privilege then if sqlerrm <> 'admin_setup_token_invalid' then raise; end if; end;
+end $$;
+reset role;
+update private.admin_setup_token set expires_at = now() + interval '5 minutes';
+set role authenticated;
+-- 24. verified Google account + valid deployment token → admin
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000e3', false);
+do $$ begin
+  assert (public.claim_initial_admin(current_setting('test.tok'))->>'claimed')::boolean, 'claimed';
   assert public.is_admin(), 'first verified account is admin';
   assert (select count(*) from public.admin_quiz_stats()) = 9, 'admin sees quiz stats';
   assert (select count(*) from public.admin_list_quiz_attempts()) >= 11, 'admin sees attempts';
@@ -283,7 +321,7 @@ end $$;
 -- 26/27. a second verified Google account cannot claim and is not admin
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000e4', false);
 do $$ begin
-  begin perform public.claim_initial_admin(); raise exception 'FAIL: second admin';
+  begin perform public.claim_initial_admin(current_setting('test.tok')); raise exception 'FAIL: second admin (token replay)';
   exception when insufficient_privilege then if sqlerrm <> 'admin_already_claimed' then raise; end if; end;
   assert not public.is_admin(), 'second Google account denied';
   assert (public.admin_setup_state()) = '{"claimed": true}'::jsonb, 'setup state reveals nothing but claimed';
@@ -310,6 +348,19 @@ do $$ begin
   exception when unique_violation then null; end;
   begin perform public.bootstrap_admin('quiz-g2@gmail.test'); raise exception 'FAIL: legacy bootstrap still works';
   exception when insufficient_privilege then null; end;
+end $$;
+
+-- ---------- Security hardening (migration 012) ----------
+reset role;
+do $$ begin
+  assert not exists (select 1 from private.admin_setup_token), 'S5. token consumed by the successful claim';
+  begin perform private.issue_admin_setup_token(); raise exception 'FAIL: token minted after setup';
+  exception when raise_exception then if sqlerrm not like 'admin_already_claimed%' then raise; end if; end;
+  assert not has_table_privilege('anon', 'public.courses', 'TRUNCATE'), 'S6. anon cannot truncate';
+  assert not has_table_privilege('authenticated', 'public.submissions', 'TRUNCATE'), 'S6. authenticated cannot truncate';
+  assert not has_table_privilege('anon', 'public.profiles', 'INSERT'), 'S6. anon has no write grants';
+  assert not has_table_privilege('anon', 'public.problems', 'UPDATE'), 'S6. anon has no write grants';
+  assert not has_function_privilege('anon', 'public.claim_initial_admin(text)', 'EXECUTE'), 'S7. guests cannot call claim';
 end $$;
 
 -- cleanup
